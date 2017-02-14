@@ -17,14 +17,14 @@ numParams = [];
 % modelFile = '/home/kamel/Seafile/Kamel/alexNet_compressed/caffe/alexNet_compressed.caffemodel';
 
 % %AlexNet bvlc
-modelName = ' AlexNet bvlc';
-protoFile = '/home/kamel/Seafile/Kamel/alexNet_compressed/caffe/alexNet.prototxt';
-modelFile = '/home/kamel/Seafile/Kamel/alexNet/caffe/bvlc_alexnet.caffemodel';
+% modelName = ' AlexNet bvlc';
+% protoFile = '/home/kamel/Seafile/Kamel/alexNet_compressed/caffe/alexNet.prototxt';
+% modelFile = '/home/kamel/Seafile/Kamel/alexNet/caffe/bvlc_alexnet.caffemodel';
 
 % %Lenet 5
-% modelName = 'leNe5';
-% protoFile = '/home/kamel/Seafile/Kamel/leNet/caffe/lenet.prototxt';
-% modelFile = '/home/kamel/Seafile/Kamel/leNet/caffe/lenet.caffemodel';
+modelName = 'leNe5';
+protoFile = '/home/kamel/Seafile/Kamel/leNet/caffe/lenet.prototxt';
+modelFile = '/home/kamel/Seafile/Kamel/leNet/caffe/lenet.caffemodel';
 
 
 cnn       = caffe.Net(protoFile,modelFile,'test');
@@ -53,6 +53,7 @@ layerNames = layerNames(~cellfun('isempty',layerNames));
 nBits = 8;
 scaleFactor = 2 ^ (nBits-1) - 1;
 sumMac = 42; 
+sumMac = 0; 
 
 for layerIndex = 1:length(layerNames)
     layerName = layerNames{layerIndex};
@@ -76,7 +77,7 @@ for layerIndex = 1:length(layerNames)
         for c=1:C;
             for kx=1:K;
                 for ky=1:K;
-                  J_mac = J_mac + multCost(w(kx,ky,c,n));
+                  J_mac = J_mac + multCost(w(kx,ky,c,n),nBits);
                 end;
             end;
             J_mac = J_mac + sumMac;
