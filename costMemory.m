@@ -68,7 +68,11 @@ end;
 costMemory_value = [memory_wo_nefs memory_w_nefs];
 
 figure()
-bar(memory_wo_nefs ./ memory_w_nefs);
+bar(costMemory_value);
 Labels = convLayerName;
 set(gca, 'XTickLabel', Labels);
+set(gca, 'YScale', 'log')
+grid on;
+ylabel('Required Memory (Bits)');
+legend('w/ nef', 'wo/ nef','Location','Northeast');
 
