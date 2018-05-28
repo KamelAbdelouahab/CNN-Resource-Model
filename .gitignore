@@ -1,0 +1,21 @@
+#Quartus rules
+*/db/
+*/incremental_db/
+*/output_files/
+*/simulation/*
+*.bak
+*.stp
+*.wlf
+*.qws
+*.qdb
+*.qpg
+*.qtl
+*_vmake
+*_info
+
+# generals
+*/build/*
+*.pyc
+
+# CaffeModels
+*.caffemodel
