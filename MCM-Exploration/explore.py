@@ -39,10 +39,9 @@ def explore(projName,dataRange,step):
         valStr = "KERNEL : std_logic_vector(7 downto 0) := std_logic_vector(to_signed("
         valStr += str(val)
         valStr += ",8))\n"
-        writeLine(vhdFile,6,valStr)                # Replace multiplicand value in VHDL File
-        previousVal = val;
+        writeLine(vhdFile,6,valStr)               # Replace multiplicand value in VHDL File
         quartusFit(projName);                                       # Lunch Quartus fitting
-        numALM = getALM(fitFile)                                       # Read number of ALMs
+        numALM = getALM(fitFile)                                      # Read number of ALMs
         alms = np.append(alms,numALM)
         vals = np.append(vals,val)
 
