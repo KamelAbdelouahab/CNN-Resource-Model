@@ -12,7 +12,7 @@ def ExploreMOA(vhdl_filename,
     nopd = np.zeros([])                                       # Number of operands
     alms = np.zeros([])                             # Corresponding number of ALMs
     exploration_res = np.zeros([num_opd_max-1,2]);
-    for n in range(1,num_opd_max):
+    for n in range(1,num_opd_max,2):
         num_opd_str = "    constant CONST_NUM_OPERANDS : natural := "
         num_opd_str += str(n)
         num_opd_str += "; \n"
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     vhdl_filename = "MOA-Exploration/DataTypes.vhd"
     fit_filename = "MOA-Exploration/output_files/ParallelMOA.fit.summary"
     qpf_filename = "MOA-Exploration/ParallelMOA.qpf"
-    csv_filename = "MOA8bits.csv"
+    csv_filename = "MOA16bits.csv"
     ExploreMOA(vhdl_filename = vhdl_filename,
                fit_filename = fit_filename,
                qpf_filename = qpf_filename,

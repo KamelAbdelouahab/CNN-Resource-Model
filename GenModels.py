@@ -31,8 +31,8 @@ def GenModelMOA(csv_filename):
     alm = lut[:,1]
     n_opd = lut[:,0]
     # Force 0 operands to have 0 ALMs
-    n_opd = np.insert(n_opd,0,0)
-    alm = np.insert(alm,0,0)
+    # n_opd = np.insert(n_opd,0,0)
+    # alm = np.insert(alm,0,0)
 
     # MMSE SOlution of linear matrix solution
     A = np.vstack([n_opd, np.ones(len(n_opd))]).T
@@ -44,10 +44,11 @@ def GenModelMOA(csv_filename):
     plt.show()
 
     # Return Coefs
+    print (m0, m1)
     return (m0, m1)
 
 if __name__ == '__main__':
     # dummy = "10110111"
     # print(DistanceOfOnes(dummy))
     #ModelSCM(csv_filename="SCM8bits.csv")
-    GenModelMOA(csv_filename="MOA8bits.csv")
+    GenModelMOA(csv_filename="MOA16bits.csv")
