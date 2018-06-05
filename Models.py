@@ -1,27 +1,53 @@
 import numpy as np
 import os
+import caffe
 
-def J_moa(n_opd):
-    coef = 3.23636364 #Generated with GenModels
-    return float(coef * n_opd)
+def quantizeWeight(float_weight,bitwidth):
+    scale_factor = 2**(bitwidth-1) - 1
+    scaled_data = np.round(float_weight * scale_factor)
+    return np.array(scaled_data, dtype=int)
 
-def J_scm(multiplicand,lut):
-    return int(lut[lut[:,0]==multiplicand,1]) # More efficient?
 
-def J_dp(kernel):
+
+def costMOA(n_opd):
+    # coef = 3.23636364
+    coef = [6.4, 1.2]
+    return float(coef[0] * n_opd + coef[1])
+
+def costSCM(multiplicand,lut):
+    return float(lut[lut[:,0]==multiplicand,1])
+    # print(multiplicand)
+    # return 1
+
+def costDotProduct(kernel):
     n_opds = np.count_nonzero(kernel)
-    j_moa = J_moa(n_opds)
+    j_moa = costMOA(n_opds)
 
     j_scm = 0
     lut = np.loadtxt("SCM8bits.csv", delimiter=',')
     for i in range(kernel.shape[0]):
-        j_scm += J_scm(kernel[i],lut)
+        j_scm += costSCM(kernel[i],lut)
     return (j_scm,j_moa)
 
-def main():
+def costActivation():
     pass
 
+def costTensorExtractor(image_width, kernel_size):
+    pass
+
+def costConv(kernel_list,bitwidth):
+    j_conv = np.zeros([kernel_list.shape[0],2],dtype=float)
+    for n in range(kernel_list.shape[0]):
+        j_conv[n,:] = costDotProduct(kernel_list[n].flatten())
+    print(j_conv)
+
 if __name__ == '__main__':
-    k = np.array([1, 2, 3, 4, 5, 6, 0, 0, 2])
-    (scm,moa) = J_dp(k)
-    print(scm,moa)
+    project_root = ""
+    proto_file = "example/caffe/lenet.prototxt"
+    model_file = "example/caffe/lenet.caffemodel"
+    bitwidth = 8
+
+    net = caffe.Net(proto_file,model_file,caffe.TEST)
+    conv1 = net.params['conv1'][0].data
+    conv1 = quantizeWeight(conv1,bitwidth)
+    costConv(conv1,bitwidth)
