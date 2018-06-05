@@ -1,0 +1,36 @@
+set_global_assignment -name FAMILY "CYCLONE V"
+set_global_assignment -name DEVICE 5CGXFC9E7F35C8
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 16.0
+set_global_assignment -name TOP_LEVEL_ENTITY cnn_process
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY build
+set_global_assignment -name NUM_PARALLEL_PROCESSORS 4
+set_global_assignment -name DSP_BLOCK_BALANCING "LOGIC ELEMENTS"
+set_global_assignment -name AUTO_DSP_RECOGNITION OFF
+set_global_assignment -name VHDL_FILE C:/Users/Kamel/dev/CNN-Resource-Model/example/hdl/bitwidths.vhd
+set_global_assignment -name VHDL_FILE C:/Users/Kamel/dev/CNN-Resource-Model/example/hdl/params.vhd
+set_global_assignment -name VHDL_FILE C:/Users/Kamel/dev/CNN-Resource-Model/example/hdl/cnn_process.vhd
+set_global_assignment -name VHDL_FILE C:/Users/Kamel/dev/haddoc2/lib/hdl/cnn_types.vhd
+set_global_assignment -name VHDL_FILE C:/Users/Kamel/dev/haddoc2/lib/hdl/InputLayer.vhd
+set_global_assignment -name VHDL_FILE C:/Users/Kamel/dev/haddoc2/lib/hdl/DisplayLayer.vhd
+set_global_assignment -name VHDL_FILE C:/Users/Kamel/dev/haddoc2/lib/hdl/ConvLayer.vhd
+set_global_assignment -name VHDL_FILE C:/Users/Kamel/dev/haddoc2/lib/hdl/MCM.vhd
+set_global_assignment -name VHDL_FILE C:/Users/Kamel/dev/haddoc2/lib/hdl/MOA.vhd
+set_global_assignment -name VHDL_FILE C:/Users/Kamel/dev/haddoc2/lib/hdl/DotProduct.vhd
+set_global_assignment -name VHDL_FILE C:/Users/Kamel/dev/haddoc2/lib/hdl/Taps.vhd
+set_global_assignment -name VHDL_FILE C:/Users/Kamel/dev/haddoc2/lib/hdl/NeighExtractor.vhd
+set_global_assignment -name VHDL_FILE C:/Users/Kamel/dev/haddoc2/lib/hdl/TensorExtractor.vhd
+set_global_assignment -name VHDL_FILE C:/Users/Kamel/dev/haddoc2/lib/hdl/TanhLayer.vhd
+set_global_assignment -name VHDL_FILE C:/Users/Kamel/dev/haddoc2/lib/hdl/PoolLayer.vhd
+set_global_assignment -name VHDL_FILE C:/Users/Kamel/dev/haddoc2/lib/hdl/poolV.vhd
+set_global_assignment -name VHDL_FILE C:/Users/Kamel/dev/haddoc2/lib/hdl/poolH.vhd
+set_global_assignment -name VHDL_FILE C:/Users/Kamel/dev/haddoc2/lib/hdl/maxPool.vhd
+
+set_global_assignment -name LAST_QUARTUS_VERSION 16.0.0
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
