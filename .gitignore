@@ -13,6 +13,10 @@
 *_vmake
 *_info
 */build/
+example/quartus/build
+example/quartus/db
+example/quartus/incremental_db
+
 
 # generals
 */build/*
