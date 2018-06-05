@@ -12,6 +12,7 @@
 *.qtl
 *_vmake
 *_info
+*/build/
 
 # generals
 */build/*
