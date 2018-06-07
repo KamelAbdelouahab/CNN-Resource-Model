@@ -10,7 +10,7 @@ def quantizeWeight(float_weight,bitwidth):
 
 def costMOA(n_opd):
     # coef = 3.23636364
-    coef = [6.4, 1.2]
+    coef = [6.78, 4.06]
     return float(coef[0] * n_opd + coef[1])
 
 def costSCM(multiplicand,lut):
@@ -19,8 +19,8 @@ def costSCM(multiplicand,lut):
     # return 1
 
 def costDotProduct(kernel):
-    n_opds = np.count_nonzero(kernel)
-    j_moa = costMOA(n_opds)
+    n_opd_nz = np.count_nonzero(kernel)
+    j_moa = costMOA(n_opd_nz+1) # Number of operands + bias term
 
     j_scm = 0
     lut = np.loadtxt("SCM8bits.csv", delimiter=',')
@@ -61,10 +61,12 @@ if __name__ == '__main__':
     conv1 = quantizeWeight(conv1,bitwidth)
     model = costConv(conv1,bitwidth)
 
-    fit_rpt_filename = "example/quartus/FittingReport.txt"
+    fit_rpt_filename = "example/quartus/build/cnn_process.fit.rpt"
     true_val = trueConv(fit_rpt_filename)
-    # print(model)
-    # print(true_val)
-    print(100*model[:,1]/true_val[:,1])
+    print(np.array([true_val[:,0], model[:,0]], dtype=float))
+    print(np.array([true_val[:,1], model[:,1]], dtype=float))
+
+    # print((true_val[:,0] - model[:,0]))
+    # print((true_val[:,1] - model[:,1]))
     # AlteraUtils.dispSortedDict(true_moa)
     # AlteraUtils.dispSortedDict(true_scm)
