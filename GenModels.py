@@ -2,18 +2,6 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
-def NumberOfOnes(bin_rep):
-    return len([c for c in bin_rep if c =='1'])
-
-def DistanceOfOnes(bin_rep):
-    pos = []
-    iter = 0
-    for d in bin_rep:
-        iter += 1
-        if d == '1' : pos.append(iter)
-    return pos
-
-
 def GenModelSCM(csv_filename):
     lut = np.loadtxt(csv_filename, delimiter=',')
     alm = lut[:,1]
@@ -40,7 +28,7 @@ def GenModelMOA(csv_filename):
 
     # Plot the MOA Model
     plt.scatter(n_opd,alm)
-    plt.plot(n_opd, m0*n_opd)
+    plt.plot(n_opd, m0*n_opd+m1)
     plt.show()
 
     # Return Coefs

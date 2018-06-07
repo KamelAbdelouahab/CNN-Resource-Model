@@ -12,12 +12,13 @@ entity ParallelMOA is
     SUM_WIDTH    : natural := CONST_SUM_WIDTH
     );
     port(
-    clk_dsp    : in  std_logic;
     clk_sys    : in  std_logic;
     reset_n    : in  std_logic;
+    enable     : in  std_logic;
     in_data    : in  data_array (0 to NUM_OPERANDS-1);
     in_valid   : in  std_logic;
-    out_data   : out std_logic_vector (SUM_WIDTH-1 downto 0)
+    out_data   : out std_logic_vector (SUM_WIDTH-1 downto 0);
+    out_valid  : out std_logic
     );
 end entity ParallelMOA;
 
@@ -26,19 +27,20 @@ architecture Bhv of ParallelMOA is
 -- SIGNALS
 -----------------------------
 signal s_acc     : std_logic_vector (SUM_WIDTH-1 downto 0) := (others=>'0');
-
 begin
   -- Implementation of a Multi Operand Adder As an Adder trees
     acc_process : process(clk_sys)
     variable v_acc : std_logic_vector (SUM_WIDTH-1 downto 0) := (others=>'0');
     begin
-        if (rising_edge(clk_sys)) then
+        if (rising_edge(clk_sys) and enable='1') then
+          if (in_valid = '1') then
             acc_loop : for i in 0 to NUM_OPERANDS-1 loop
                 v_acc := v_acc + in_data(i);
             end loop acc_loop;
-
+          end if;
         end if;
     s_acc <= v_acc;
+    out_valid <= in_valid;
     end process;
     out_data <= s_acc;
 end architecture Bhv;
