@@ -3,45 +3,7 @@ import AlteraUtils
 import Models
 import matplotlib.pyplot as plt
 import caffe
-
-def NumberOfOnes(num,bitwidth):
-    bin_rep = np.binary_repr(int(num), width=bitwidth)
-    return len([c for c in bin_rep if c =='1'])
-
-def DistanceOfOnes(bin_rep):
-    pos = []
-    iter = 0
-    for d in bin_rep:
-        iter += 1
-        if d == '1' : pos.append(iter)
-    return pos
-
-def isPowerTwo(num):
-    return ((num & (num - 1)) == 0)
-
-def nbPowerTwo(kernel):
-    nb_pow_two = 0
-    for c in range(kernel.shape[0]):
-        for j in range(kernel.shape[1]):
-            for k in range(kernel.shape[2]):
-                nb_pow_two += int(isPowerTwo(kernel[c,j,k]))
-    return nb_pow_two
-
-def nbOnes(kernel,bitwidth):
-    nb_ones = 0
-    for c in range(kernel.shape[0]):
-        for j in range(kernel.shape[1]):
-            for k in range(kernel.shape[2]):
-                nb_ones += NumberOfOnes(kernel[c,j,k], bitwidth)
-    return nb_ones
-
-def nbNull(kernel):
-    nb_null = 0
-    for c in range(kernel.shape[0]):
-        for j in range(kernel.shape[1]):
-            for k in range(kernel.shape[2]):
-                nb_null += (kernel[c,j,k] == 0)
-    return nb_null
+from AnalyseWeights import *
 
 if __name__ == '__main__':
     project_root = ""
