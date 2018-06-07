@@ -63,15 +63,24 @@ if __name__ == '__main__':
     # Pourcentage
     nb_pow_two = 100* nb_pow_two / (conv.shape[1]*conv.shape[2]*conv.shape[3])
     nb_null = 100* nb_null / (conv.shape[1]*conv.shape[2]*conv.shape[3])
+    nb_ones = 100* nb_ones / (conv.shape[1]*conv.shape[2]*conv.shape[3]*6)
 
-    # Read number of ALMs
-    # instance_name = ";       |DotProduct:"
-    instance_name = ";          |MCM:MCM_i|"
+    fit_rpt_filename = "example/quartus/lenet5_conv2_6bits.txt"
+
+    # instance_name = ";          |MCM:MCM_i|"
+    # alm = AlteraUtils.getALM(fit_rpt_filename, instance_name)
+    # np_alm = np.array(list(alm.items()))[:,1]  # Dict -> Numpy array
+    # plt.scatter(nb_pow_two,np_alm,marker='o')
+    #
     # instance_name = ";          |MOA:MOA_i|"
-    fit_rpt_filename = "example/quartus/FittingConv2.txt"
-    alm = AlteraUtils.getALM(fit_rpt_filename, instance_name)
-    np_alm = np.array(list(alm.items()))[:,1]  # Dict -> Numpy array
+    # alm = AlteraUtils.getALM(fit_rpt_filename, instance_name)
+    # np_alm = np.array(list(alm.items()))[:,1]
+    # plt.scatter(nb_null,np_alm,marker='^')
 
-    plt.scatter(nb_null,np_alm,marker='^')
-    plt.scatter(nb_pow_two,np_alm,marker='o')
+    instance_name = ";       |DotProduct"
+    alm = AlteraUtils.getALM(fit_rpt_filename, instance_name)
+    np_alm = np.array(list(alm.items()))[:,1]
+    plt.scatter(nb_ones,np_alm,marker='o')
+
+    plt.axis([0, 80, 0, 1200])
     plt.show()
