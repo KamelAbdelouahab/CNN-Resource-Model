@@ -63,22 +63,47 @@ def main(conv_layer,bitwidth):
     nb_null = 100* nb_null / conv_layer.size
     nb_negative = 100* nb_negative / conv_layer.size
     nb_pow_two = 100* nb_pow_two / conv_layer.size
-
+    print('=======================================')
+    print( "%s : %.2f " % ("Number of weights", conv_layer.size))
+    print( "%s : %.2f " % ("Null Kernel", nb_null))
+    print( "%s : %.2f " % ("Power2 Kernels", nb_pow_two))
+    print( "%s : %.2f " % ("Negative Kernels", nb_negative))
     return nb_null, nb_negative, nb_pow_two
+
+def kernelStats(conv_layer,bitwidth):
+    nb_pow_two = np.zeros(conv_layer.shape[0], dtype=int)
+    nb_negative = np.zeros(conv_layer.shape[0], dtype=int)
+    nb_bit_one = np.zeros(conv_layer.shape[0], dtype=int)
+    nb_null = np.zeros(conv_layer.shape[0], dtype=int)
+
+    conv_layer = Models.quantizeWeight(conv_layer,bitwidth)
+    for n in range(conv_layer.shape[0]):
+        nb_null[n] = nbNull(conv_layer[n,:])
+        nb_pow_two[n] = nbPowerTwo(conv_layer[n,:])
+        nb_negative[n] = nbNegative(conv_layer[n,:])
+        nb_bit_one[n] = nbOnes(conv_layer[n,:], bitwidth)
+
+    nb_null = 100* nb_null / conv_layer[1,:].size
+    nb_negative = 100* nb_negative / conv_layer[1,:].size
+    nb_pow_two = 100* nb_pow_two / conv_layer[1,:].size
+    nb_bit_one = 100* nb_bit_one / (conv_layer[1,:].size*bitwidth)
+    return nb_null, nb_negative, nb_pow_two, nb_bit_one
 
 if __name__ == '__main__':
     proto_file = "C:/Users/Kamel/Seafile/CNN-Models/alexnet.prototxt"
     model_file = "C:/Users/Kamel/Seafile/CNN-Models/alexnet.caffemodel"
-    layer_name = 'conv2'
+    layer_name = 'conv1'
     bitwidth = 6
 
     net = caffe.Net(proto_file,model_file,caffe.TEST)
     conv_layer = net.params[layer_name][0].data
-    nb_null, nb_negative, nb_pow_two  = main(conv_layer, bitwidth)
     print("Model:" + model_file)
     print("Layer:" + layer_name)
     print("Bitwidth:" + str(bitwidth))
-    print('=======================================')
-    print( "%s : %.2f " % ("Null Kernel", nb_null))
-    print( "%s : %.2f " % ("Negative Kernels", nb_negative))
-    print( "%s : %.2f " % ("Power2 Kernels", nb_pow_two))
+
+    # nb_null, nb_negative, nb_pow_two  = main(conv_layer, bitwidth)
+    nb_null, nb_negative, nb_pow_two,nb_bit_one  = kernelStats(conv_layer, bitwidth)
+    alm = 0.9 * np.random.rand(conv_layer.shape[0])
+    plt.scatter(nb_pow_two,alm)
+    plt.axis([0, 100, 0, 1])
+    plt.show()

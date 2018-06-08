@@ -32,12 +32,6 @@ signal data_fv	: std_logic;
 signal conv1_data: pixel_array (0 to conv1_OUT_SIZE - 1);
 signal conv1_dv	: std_logic;
 signal conv1_fv	: std_logic;
-signal pool1_data: pixel_array (0 to pool1_OUT_SIZE - 1);
-signal pool1_dv	: std_logic;
-signal pool1_fv	: std_logic;
-signal conv2_data: pixel_array (0 to conv2_OUT_SIZE - 1);
-signal conv2_dv	: std_logic;
-signal conv2_fv	: std_logic;
 
 --Components
 component InputLayer
@@ -161,57 +155,15 @@ port map (
   out_fv   => conv1_fv
 );
 
-pool1 : PoolLayer
-generic map (
-  PIXEL_SIZE   => PIXEL_SIZE,
-  IMAGE_WIDTH  => pool1_IMAGE_WIDTH,
-  KERNEL_SIZE  => pool1_KERNEL_SIZE,
-  NB_OUT_FLOWS => pool1_OUT_SIZE
-)
-port map (
-  clk      => clk,
-  reset_n  => reset_n,
-  enable   => enable,
-  in_data  => conv1_data,
-  in_dv    => conv1_dv,
-  in_fv    => conv1_fv,
-  out_data => pool1_data,
-  out_dv   => pool1_dv,
-  out_fv   => pool1_fv
-);
-
-conv2: ConvLayer
-generic map (
-  PIXEL_SIZE   => PIXEL_SIZE,
-  SUM_WIDTH    => SUM_WIDTH,
-  IMAGE_WIDTH  => conv2_IMAGE_WIDTH,
-  KERNEL_SIZE  => conv2_KERNEL_SIZE,
-  NB_IN_FLOWS  => conv2_IN_SIZE,
-  NB_OUT_FLOWS => conv2_OUT_SIZE,
-  KERNEL_VALUE => conv2_KERNEL_VALUE,
-  BIAS_VALUE   => conv2_BIAS_VALUE
-)
-port map (
-  clk      => clk,
-  reset_n  => reset_n,
-  enable   => enable,
-  in_data  => pool1_data,
-  in_dv    => pool1_dv,
-  in_fv    => pool1_fv,
-  out_data => conv2_data,
-  out_dv   => conv2_dv,
-  out_fv   => conv2_fv
-);
-
 DisplayLayer_i: DisplayLayer
   generic map(
   PIXEL_SIZE => PIXEL_SIZE,
-  NB_IN_FLOWS => conv2_OUT_SIZE
+  NB_IN_FLOWS => conv1_OUT_SIZE
   )
   port map(
-  in_data  => conv2_data,
-  in_dv    => conv2_dv,
-  in_fv    => conv2_fv,
+  in_data  => conv1_data,
+  in_dv    => conv1_dv,
+  in_fv    => conv1_fv,
   sel      => select_i,
   out_data => out_data,
   out_dv   => out_dv,
