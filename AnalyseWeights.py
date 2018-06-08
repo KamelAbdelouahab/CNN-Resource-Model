@@ -97,12 +97,12 @@ def kernelStats(conv_layer,bitwidth):
     nb_bit_one = 100* nb_bit_one / (conv_layer[1,:].size*bitwidth)
     return nb_null, nb_negative, nb_pow_two, nb_bit_one
 
-def quoiMaGueule(nb_alm):
+def removeShit(nb_alm):
     nb_alm[1] = 410
     nb_alm[87] = 420
     nb_alm[91] = 280
     nb_alm[93] = 380
-    return nb_alm    
+    return nb_alm
 
 if __name__ == '__main__':
     proto_file = "C:/Users/Kamel/Seafile/CNN-Models/alexnet.prototxt"

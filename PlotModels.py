@@ -1,7 +1,6 @@
 import numpy as np
 from scipy import stats
 import AlteraUtils
-import Models
 import caffe
 from AnalyseWeights import *
 from scipy import stats
@@ -38,7 +37,7 @@ if __name__ == '__main__':
     instance_name = ";          |MCM:MCM_i|"
     alm = AlteraUtils.getALM(fit_rpt_filename, instance_name)
     nb_alm = np.array(list(alm.items()))[:,1]
-    nb_alm = quoiMaGueule(nb_alm)
+    nb_alm = removeShit(nb_alm)
     slope, intercept, r_value, p_value, std_err = stats.linregress(nb_bit_one, nb_alm)
     # print( "%s : %.2f " % ("r²", r_value**2))
 
