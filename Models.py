@@ -39,6 +39,28 @@ def paramCorrelation(conv, bitwidth, fit_rpt_filename):
     rho, pval = stats.spearmanr(nb_null, nb_pow2)
     print("Correlation nb_null and nb_pow2, r2 = %.4f , p = %.4f" % (r_value**2, rho))
 
+def resourceByEntity(fit_rpt_filename):
+    scm_inst = ";          |MCM:MCM_i|"
+    alm = AlteraUtils.getALM(fit_rpt_filename, scm_inst)
+    scm_alm = np.sum(np.array(list(alm.items()))[:,1])
+
+    moa_inst = ";          |MOA:MOA_i|"
+    alm = AlteraUtils.getALM(fit_rpt_filename, moa_inst)
+    moa_alm = np.sum(np.array(list(alm.items()))[:,1])
+    total = moa_alm + scm_alm
+
+    dotprod_inst = ";       |DotProduct:"
+    alm = AlteraUtils.getALM(fit_rpt_filename, dotprod_inst)
+    dotprod_alm = (np.array(list(alm.items()))[:,1])
+
+    print("\nResources utilization by entity ============================")
+    print("Single Constant Multipliers (SCMs):\t %d \t %.2f %%" % (scm_alm, 100*scm_alm/total))
+    print("Multi Operand Adders (MOAs):\t\t %d \t %.2f %%" % (moa_alm, 100*moa_alm/total))
+    print("DotProduct Range:\t\t\t %d \t %d" % (np.min(dotprod_alm), np.max(dotprod_alm)))
+    plt.hist(dotprod_alm, bins=10)
+    plt.title("Histogram of Resources Allocated to Dot Products")
+    plt.show()
+
 def modelMOA(conv, bitwidth, fit_rpt_filename):
     nb_null, nb_ngtv, nb_pow2, nb_bit1  = AnalyseWeights.kernelStats(conv, bitwidth)
     instance_name = ";          |MOA:MOA_i|"
@@ -46,8 +68,8 @@ def modelMOA(conv, bitwidth, fit_rpt_filename):
     nb_alm = np.array(list(alm.items()))[:,1]
 
     ## Removing irrational costs
-    nb_alm[91] = 1170
-    nb_alm[93] = 730
+    # nb_alm[91] = 1170
+    # nb_alm[93] = 730
 
     X = np.array([nb_null, nb_pow2], dtype=float)
     X = X.T
@@ -87,7 +109,6 @@ def modelMOA(conv, bitwidth, fit_rpt_filename):
     ax.set_xlabel('Number of Nulls/Kernel')
     ax.set_ylabel('Number of Pow2/Kernel')
     ax.set_zlabel('Resource (ALMs)')
-    print(clf.coef_)
     plt.show()
 
 def modelSCM(conv, bitwidth, fit_rpt_filename):
@@ -97,7 +118,7 @@ def modelSCM(conv, bitwidth, fit_rpt_filename):
     nb_alm = np.array(list(alm.items()))[:,1]
 
     ## Removing irrational costs
-    AnalyseWeights.removeShit(nb_alm)
+    # AnalyseWeights.removeShit(nb_alm)
 
     ## Linear regression
     print('\nSCM Model ===================================================')
@@ -138,29 +159,7 @@ def modelSCM(conv, bitwidth, fit_rpt_filename):
     ax.set_ylabel('Number of Pow2/Kernel')
     ax.set_zlabel('Resource (ALMs)')
     plt.show()
-    print(clf.coef_)
 
-def resourceByEntity(fit_rpt_filename= "Results/alexnet_conv1_6bits.txt"):
-    scm_inst = ";          |MCM:MCM_i|"
-    alm = AlteraUtils.getALM(fit_rpt_filename, scm_inst)
-    scm_alm = np.sum(np.array(list(alm.items()))[:,1])
-
-    moa_inst = ";          |MOA:MOA_i|"
-    alm = AlteraUtils.getALM(fit_rpt_filename, moa_inst)
-    moa_alm = np.sum(np.array(list(alm.items()))[:,1])
-    total = moa_alm + scm_alm
-
-    dotprod_inst = ";       |DotProduct:"
-    alm = AlteraUtils.getALM(fit_rpt_filename, dotprod_inst)
-    dotprod_alm = (np.array(list(alm.items()))[:,1])
-
-    print("\nResources utilization by entity ============================")
-    print("Single Constant Multipliers (SCMs):\t %d \t %.2f %%" % (scm_alm, 100*scm_alm/total))
-    print("Multi Operand Adders (MOAs):\t\t %d \t %.2f %%" % (moa_alm, 100*moa_alm/total))
-    print("DotProduct Range:\t\t\t %d \t %d" % (np.min(dotprod_alm), np.max(dotprod_alm)))
-    plt.hist(dotprod_alm, bins=10)
-    plt.title("Histogram of Resources Allocated to Dot Products")
-    plt.show()
 
 if __name__ == '__main__':
     proto_file = "C:/Users/Kamel/Seafile/CNN-Models/alexnet.prototxt"
@@ -177,7 +176,7 @@ if __name__ == '__main__':
     print("Bitwidth:" + str(bitwidth))
 
     AnalyseWeights.kernelStatsTotal(conv, bitwidth)
+    resourceByEntity(fit_rpt_filename)
     paramCorrelation(conv, bitwidth, fit_rpt_filename)
-    resourceByEntity()
     modelMOA(conv, bitwidth, fit_rpt_filename)
     modelSCM(conv, bitwidth, fit_rpt_filename)
