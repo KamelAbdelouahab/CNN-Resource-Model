@@ -8,7 +8,7 @@ library work;
 entity cnn_process is
 generic(
   PIXEL_SIZE  : integer := PIXEL_CONST;
-  IMAGE_WIDTH : integer := CONV1_IMAGE_WIDTH
+  IMAGE_WIDTH : integer := conv1_1_IMAGE_WIDTH
 );
 port(
   clk      : in std_logic;
@@ -26,12 +26,12 @@ end entity;
 
 architecture STRUCTURAL of cnn_process is
  -- Signals
-signal data_data: pixel_array(0 to conv1_IN_SIZE-1);
+signal data_data: pixel_array(0 to conv1_1_IN_SIZE-1);
 signal data_dv	: std_logic;
 signal data_fv	: std_logic;
-signal conv1_data: pixel_array (0 to conv1_OUT_SIZE - 1);
-signal conv1_dv	: std_logic;
-signal conv1_fv	: std_logic;
+signal conv1_1_data: pixel_array (0 to conv1_1_OUT_SIZE - 1);
+signal conv1_1_dv	: std_logic;
+signal conv1_1_fv	: std_logic;
 
 --Components
 component InputLayer
@@ -118,7 +118,7 @@ InputLayer_i : InputLayer
 generic map (
   PIXEL_SIZE      => PIXEL_SIZE,
   PIXEL_BIT_WIDTH => PIXEL_SIZE,
-  NB_OUT_FLOWS    => conv1_IN_SIZE
+  NB_OUT_FLOWS    => conv1_1_IN_SIZE
 )
 port map (
   clk      => clk,
@@ -132,16 +132,16 @@ port map (
   out_fv   => data_fv
   );
 
-conv1: ConvLayer
+conv1_1: ConvLayer
 generic map (
   PIXEL_SIZE   => PIXEL_SIZE,
   SUM_WIDTH    => SUM_WIDTH,
-  IMAGE_WIDTH  => conv1_IMAGE_WIDTH,
-  KERNEL_SIZE  => conv1_KERNEL_SIZE,
-  NB_IN_FLOWS  => conv1_IN_SIZE,
-  NB_OUT_FLOWS => conv1_OUT_SIZE,
-  KERNEL_VALUE => conv1_KERNEL_VALUE,
-  BIAS_VALUE   => conv1_BIAS_VALUE
+  IMAGE_WIDTH  => conv1_1_IMAGE_WIDTH,
+  KERNEL_SIZE  => conv1_1_KERNEL_SIZE,
+  NB_IN_FLOWS  => conv1_1_IN_SIZE,
+  NB_OUT_FLOWS => conv1_1_OUT_SIZE,
+  KERNEL_VALUE => conv1_1_KERNEL_VALUE,
+  BIAS_VALUE   => conv1_1_BIAS_VALUE
 )
 port map (
   clk      => clk,
@@ -150,20 +150,20 @@ port map (
   in_data  => data_data,
   in_dv    => data_dv,
   in_fv    => data_fv,
-  out_data => conv1_data,
-  out_dv   => conv1_dv,
-  out_fv   => conv1_fv
+  out_data => conv1_1_data,
+  out_dv   => conv1_1_dv,
+  out_fv   => conv1_1_fv
 );
 
 DisplayLayer_i: DisplayLayer
   generic map(
   PIXEL_SIZE => PIXEL_SIZE,
-  NB_IN_FLOWS => conv1_OUT_SIZE
+  NB_IN_FLOWS => conv1_1_OUT_SIZE
   )
   port map(
-  in_data  => conv1_data,
-  in_dv    => conv1_dv,
-  in_fv    => conv1_fv,
+  in_data  => conv1_1_data,
+  in_dv    => conv1_1_dv,
+  in_fv    => conv1_1_fv,
   sel      => select_i,
   out_data => out_data,
   out_dv   => out_dv,

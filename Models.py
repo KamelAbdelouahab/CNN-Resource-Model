@@ -224,4 +224,3 @@ if __name__ == '__main__':
     resourceByEntity()
     modelMOA()
     modelSCM()
-    # resourceByEntity("Results\lenet_conv2_6bits.txt")
