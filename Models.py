@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import stats
 import AlteraUtils
-from AnalyseWeights import *
+import AnalyseWeights
 from sklearn import linear_model
 import matplotlib.pyplot as plt
 from contextlib import contextmanager
@@ -31,7 +31,7 @@ def paramCorrelation():
     conv = parseLayerParam(network_name, layer_name, bitwidth)
     fit_rpt_filename = parseLayerResource(network_name, layer_name, bitwidth)
 
-    nb_null, nb_negative, nb_pow_two, nb_bit_one  = kernelStats(conv, bitwidth)
+    nb_null, nb_negative, nb_pow_two, nb_bit_one  = AnalyseWeights.kernelStats(conv, bitwidth)
     nb_opd = (100 - nb_null) * conv[1].size/100
     nb_null = nb_null * conv[1].size/100
     nb_pow = nb_pow_two * conv[1].size/100
@@ -57,7 +57,7 @@ def modelMOA():
     conv = parseLayerParam(network_name, layer_name, bitwidth)
     fit_rpt_filename = parseLayerResource(network_name, layer_name, bitwidth)
 
-    nb_null, nb_negative, nb_pow_two, nb_bit_one  = kernelStats(conv, bitwidth)
+    nb_null, nb_negative, nb_pow_two, nb_bit_one  = AnalyseWeights.kernelStats(conv, bitwidth)
     instance_name = ";          |MOA:MOA_i|"
     alm = AlteraUtils.getALM(fit_rpt_filename, instance_name)
     nb_alm = np.array(list(alm.items()))[:,1]
@@ -120,7 +120,7 @@ def modelSCM():
     bitwidth = 6
     conv = parseLayerParam(network_name, layer_name, bitwidth)
     fit_rpt_filename = parseLayerResource(network_name, layer_name, bitwidth)
-    nb_null, nb_negative, nb_pow_two, nb_bit_one  = kernelStats(conv, bitwidth)
+    nb_null, nb_negative, nb_pow_two, nb_bit_one  = AnalyseWeights.kernelStats(conv, bitwidth)
 
     instance_name = ";          |MCM:MCM_i|"
     alm = AlteraUtils.getALM(fit_rpt_filename, instance_name)
@@ -131,7 +131,7 @@ def modelSCM():
     nb_pow = nb_pow_two * conv[1].size/100
     nb_bit_one = nb_bit_one * conv[1].size/100 * bitwidth
     ## Removing irrational costs
-    removeShit(nb_alm)
+    AnalyseWeights.removeShit(nb_alm)
 
     # plt.figure(0)
     # plt.scatter(nb_pow + nb_null, nb_alm, marker='o')
