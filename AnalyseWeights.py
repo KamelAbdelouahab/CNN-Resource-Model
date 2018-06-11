@@ -26,20 +26,20 @@ def isPowerTwo(num):
     return num !=0 and ((num & (num - 1)) == 0)
 
 def nbNegative(kernel):
-    nb_neg = 0
+    nb_ngtv = 0
     for c in range(kernel.shape[0]):
         for j in range(kernel.shape[1]):
             for k in range(kernel.shape[2]):
-                nb_neg += (kernel[c,j,k] < 0)
-    return nb_neg
+                nb_ngtv += (kernel[c,j,k] < 0)
+    return nb_ngtv
 
 def nbPowerTwo(kernel):
-    nb_pow_two = 0
+    nb_pow2 = 0
     for c in range(kernel.shape[0]):
         for j in range(kernel.shape[1]):
             for k in range(kernel.shape[2]):
-                nb_pow_two += int(isPowerTwo(kernel[c,j,k]))
-    return nb_pow_two
+                nb_pow2 += int(isPowerTwo(kernel[c,j,k]))
+    return nb_pow2
 
 def nbOnes(kernel,bitwidth):
     nb_ones = 0
@@ -58,44 +58,40 @@ def nbNull(kernel):
     return nb_null
 
 def kernelStatsTotal(conv_layer,bitwidth):
-    nb_null, nb_negative, nb_pow_two, nb_bit_one = 0,0,0,0
+    nb_null, nb_ngtv, nb_pow2, nb_bit1 = 0,0,0,0
     conv_layer = quantizeWeight(conv_layer,bitwidth)
     for n in range(conv_layer.shape[0]):
         nb_null += nbNull(conv_layer[n,:])
-        nb_negative += nbNegative(conv_layer[n,:])
-        nb_pow_two += nbPowerTwo(conv_layer[n,:])
-        nb_bit_one += nbOnes(conv_layer[n,:], bitwidth)
+        nb_ngtv += nbNegative(conv_layer[n,:])
+        nb_pow2 += nbPowerTwo(conv_layer[n,:])
+        nb_bit1 += nbOnes(conv_layer[n,:], bitwidth)
 
     nb_null = 100* nb_null / conv_layer.size
-    nb_negative = 100* nb_negative / conv_layer.size
-    nb_pow_two = 100* nb_pow_two / conv_layer.size
-    nb_bit_one = 100* nb_bit_one / (conv_layer.size*bitwidth)
-    print('=======================================')
-    print( "%s : %d " % ("Number of weights", conv_layer.size))
-    print( "%s : %.2f " % ("Pourcentage of Null Kernels", nb_null))
-    print( "%s : %.2f " % ("Pourcentage of Power2 Kernels", nb_pow_two))
-    print( "%s : %.2f " % ("Pourcentage of Negative Kernels", nb_negative))
-    print( "%s : %.2f " % ("Pourcentage of Bits=1", nb_bit_one))
-    return nb_null, nb_negative, nb_pow_two, nb_bit_one
+    nb_ngtv = 100* nb_ngtv / conv_layer.size
+    nb_pow2 = 100* nb_pow2 / conv_layer.size
+    nb_bit1 = 100* nb_bit1 / (conv_layer.size*bitwidth)
+    print('=============================================================')
+    print( "%s: %d " % ("Number of weights", conv_layer.size))
+    print( "%s:\t %.2f %%" % ("Pourcentage of Null Kernels", nb_null))
+    print( "%s:\t %.2f %%" % ("Pourcentage of Power2 Kernels", nb_pow2))
+    print( "%s: %.2f %%" % ("Pourcentage of Negative Kernels", nb_ngtv))
+    print( "%s:\t\t %.2f %%" % ("Pourcentage of Bits=1", nb_bit1))
+    return nb_null, nb_ngtv, nb_pow2, nb_bit1
 
 def kernelStats(conv_layer,bitwidth):
-    nb_pow_two = np.zeros(conv_layer.shape[0], dtype=int)
-    nb_negative = np.zeros(conv_layer.shape[0], dtype=int)
-    nb_bit_one = np.zeros(conv_layer.shape[0], dtype=int)
+    nb_pow2 = np.zeros(conv_layer.shape[0], dtype=int)
+    nb_ngtv = np.zeros(conv_layer.shape[0], dtype=int)
+    nb_bit1 = np.zeros(conv_layer.shape[0], dtype=int)
     nb_null = np.zeros(conv_layer.shape[0], dtype=int)
 
     conv_layer = quantizeWeight(conv_layer,bitwidth)
     for n in range(conv_layer.shape[0]):
         nb_null[n] = nbNull(conv_layer[n,:])
-        nb_pow_two[n] = nbPowerTwo(conv_layer[n,:])
-        nb_negative[n] = nbNegative(conv_layer[n,:])
-        nb_bit_one[n] = nbOnes(conv_layer[n,:], bitwidth)
+        nb_pow2[n] = nbPowerTwo(conv_layer[n,:])
+        nb_ngtv[n] = nbNegative(conv_layer[n,:])
+        nb_bit1[n] = nbOnes(conv_layer[n,:], bitwidth)
 
-    nb_null = 100* nb_null / conv_layer[1,:].size
-    nb_negative = 100* nb_negative / conv_layer[1,:].size
-    nb_pow_two = 100* nb_pow_two / conv_layer[1,:].size
-    nb_bit_one = 100* nb_bit_one / (conv_layer[1,:].size*bitwidth)
-    return nb_null, nb_negative, nb_pow_two, nb_bit_one
+    return nb_null, nb_ngtv, nb_pow2, nb_bit1
 
 def removeShit(nb_alm):
     nb_alm[1] = 410
@@ -116,9 +112,9 @@ if __name__ == '__main__':
     print("Model:" + model_file)
     print("Layer:" + layer_name)
     print("Bitwidth:" + str(bitwidth))
-    nb_null, nb_negative, nb_pow_two , nb_ones= kernelStatsTotal(conv_layer, bitwidth)
-    # nb_null, nb_negative, nb_pow_two,nb_bit_one  = kernelStats(conv_layer, bitwidth)
+    nb_null, nb_ngtv, nb_pow2 , nb_ones= kernelStatsTotal(conv_layer, bitwidth)
+    # nb_null, nb_ngtv, nb_pow2,nb_bit1  = kernelStats(conv_layer, bitwidth)
     # alm = 0.9 * np.random.rand(conv_layer.shape[0])
-    # plt.scatter(nb_pow_two,alm)
+    # plt.scatter(nb_pow2,alm)
     # plt.axis([0, 100, 0, 1])
     # plt.show()
