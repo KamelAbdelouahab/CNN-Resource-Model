@@ -23,14 +23,7 @@ def parseLayerResource(network_name, layer_name, bitwidth):
     fit_rpt_filename += "_" + str(bitwidth) + "bits.txt"
     return fit_rpt_filename
 
-def paramCorrelation():
-    network_name = "alexnet"
-    layer_name = 'conv1'
-    bitwidth = 6
-
-    conv = parseLayerParam(network_name, layer_name, bitwidth)
-    fit_rpt_filename = parseLayerResource(network_name, layer_name, bitwidth)
-
+def paramCorrelation(conv, bitwidth, fit_rpt_filename):
     nb_null, nb_ngtv, nb_pow2, nb_bit1  = AnalyseWeights.kernelStats(conv, bitwidth)
     ## Correlation between metrics
     print('\nCorrelation between metrics:=================================')
@@ -46,15 +39,7 @@ def paramCorrelation():
     rho, pval = stats.spearmanr(nb_null, nb_pow2)
     print("Correlation nb_null and nb_pow2, r2 = %.4f , p = %.4f" % (r_value**2, rho))
 
-def modelMOA():
-    # Modeling on Alexnet Data
-    network_name = "alexnet"
-    layer_name = 'conv1'
-    bitwidth = 6
-
-    conv = parseLayerParam(network_name, layer_name, bitwidth)
-    fit_rpt_filename = parseLayerResource(network_name, layer_name, bitwidth)
-
+def modelMOA(conv, bitwidth, fit_rpt_filename):
     nb_null, nb_ngtv, nb_pow2, nb_bit1  = AnalyseWeights.kernelStats(conv, bitwidth)
     instance_name = ";          |MOA:MOA_i|"
     alm = AlteraUtils.getALM(fit_rpt_filename, instance_name)
@@ -105,27 +90,14 @@ def modelMOA():
     print(clf.coef_)
     plt.show()
 
-def modelSCM():
-    # Modeling on Alexnet Data
-    network_name = "alexnet"
-    layer_name = 'conv1'
-    bitwidth = 6
-    conv = parseLayerParam(network_name, layer_name, bitwidth)
-    fit_rpt_filename = parseLayerResource(network_name, layer_name, bitwidth)
+def modelSCM(conv, bitwidth, fit_rpt_filename):
     nb_null, nb_ngtv, nb_pow2, nb_bit1  = AnalyseWeights.kernelStats(conv, bitwidth)
-
     instance_name = ";          |MCM:MCM_i|"
     alm = AlteraUtils.getALM(fit_rpt_filename, instance_name)
     nb_alm = np.array(list(alm.items()))[:,1]
 
     ## Removing irrational costs
     AnalyseWeights.removeShit(nb_alm)
-
-    # plt.figure(0)
-    # plt.scatter(nb_pow2 + nb_null, nb_alm, marker='o')
-    # plt.show()
-    # plt.plot(nb_bit1, slope*(nb_bit1) + intercept, color='red')
-    # plt.show()
 
     ## Linear regression
     print('\nSCM Model ===================================================')
@@ -190,37 +162,22 @@ def resourceByEntity(fit_rpt_filename= "Results/alexnet_conv1_6bits.txt"):
     plt.title("Histogram of Resources Allocated to Dot Products")
     plt.show()
 
-def costMOA(kernel):
-    pass
-
-def costSCM(kernel):
-    pass
-
-def costDotProduct(kernel):
-    pass
-
-def costActivation():
-    pass
-
-def costTensorExtractor(image_width, kernel_size):
-    pass
-
-def costConv(kernel_list,bitwidth):
-    pass
-
 if __name__ == '__main__':
     proto_file = "C:/Users/Kamel/Seafile/CNN-Models/alexnet.prototxt"
     model_file = "C:/Users/Kamel/Seafile/CNN-Models/alexnet.caffemodel"
     layer_name = 'conv1'
+    fit_rpt_filename = "Results/alexnet_conv1_6bits.txt"
     bitwidth = 6
 
     net = caffe.Net(proto_file,model_file,caffe.TEST)
-    conv_layer = net.params[layer_name][0].data
+    conv = net.params[layer_name][0].data
+
     print("Model:" + model_file)
     print("Layer:" + layer_name)
     print("Bitwidth:" + str(bitwidth))
-    AnalyseWeights.kernelStatsTotal(conv_layer, bitwidth)
-    paramCorrelation()
+
+    AnalyseWeights.kernelStatsTotal(conv, bitwidth)
+    paramCorrelation(conv, bitwidth, fit_rpt_filename)
     resourceByEntity()
-    modelMOA()
-    modelSCM()
+    modelMOA(conv, bitwidth, fit_rpt_filename)
+    modelSCM(conv, bitwidth, fit_rpt_filename)
