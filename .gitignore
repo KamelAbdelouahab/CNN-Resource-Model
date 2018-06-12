@@ -16,7 +16,7 @@
 example/quartus/build
 example/quartus/db
 example/quartus/incremental_db
-example/hdl
+example/hdl/*
 
 
 # generals
