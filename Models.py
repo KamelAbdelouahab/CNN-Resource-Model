@@ -9,20 +9,6 @@ import os
 os.environ['GLOG_minloglevel'] = '2'
 import caffe
 
-def parseLayerParam(network_name, layer_name, bitwidth):
-    proto_file = "example/caffe/" + network_name + "_conv1.prototxt"
-    model_file = "C:/Users/Kamel/Seafile/CNN-Models/" + network_name + ".caffemodel"
-    net = caffe.Net(proto_file,model_file,caffe.TEST)
-    conv = net.params[layer_name][0].data
-    return conv
-
-def parseLayerResource(network_name, layer_name, bitwidth):
-    fit_rpt_filename = "Results/"
-    fit_rpt_filename += network_name
-    fit_rpt_filename += "_" + layer_name
-    fit_rpt_filename += "_" + str(bitwidth) + "bits.txt"
-    return fit_rpt_filename
-
 def paramCorrelation(conv, bitwidth, fit_rpt_filename):
     nb_null, nb_ngtv, nb_pow2, nb_bit1  = AnalyseWeights.kernelStats(conv, bitwidth)
     ## Correlation between metrics
@@ -63,9 +49,11 @@ def resourceByEntity(fit_rpt_filename):
 
 def modelMOA(conv, bitwidth, fit_rpt_filename):
     nb_null, nb_ngtv, nb_pow2, nb_bit1  = AnalyseWeights.kernelStats(conv, bitwidth)
+    where_full_null = AnalyseWeights.whereNull(conv, bitwidth)
     instance_name = ";          |MOA:MOA_i|"
     alm = AlteraUtils.getALM(fit_rpt_filename, instance_name)
     nb_alm = np.array(list(alm.items()))[:,1]
+    nb_alm = np.insert(nb_alm, 0, where_full_null)
 
     ## Removing irrational costs
     # nb_alm[91] = 1170
@@ -113,9 +101,11 @@ def modelMOA(conv, bitwidth, fit_rpt_filename):
 
 def modelSCM(conv, bitwidth, fit_rpt_filename):
     nb_null, nb_ngtv, nb_pow2, nb_bit1  = AnalyseWeights.kernelStats(conv, bitwidth)
+    where_full_null = AnalyseWeights.whereNull(conv, bitwidth)
     instance_name = ";          |MCM:MCM_i|"
     alm = AlteraUtils.getALM(fit_rpt_filename, instance_name)
     nb_alm = np.array(list(alm.items()))[:,1]
+    nb_alm = np.insert(nb_alm, 0, where_full_null)
 
     ## Removing irrational costs
     # AnalyseWeights.removeShit(nb_alm)
@@ -162,10 +152,10 @@ def modelSCM(conv, bitwidth, fit_rpt_filename):
 
 
 if __name__ == '__main__':
-    proto_file = "C:/Users/Kamel/Seafile/CNN-Models/alexnet.prototxt"
-    model_file = "C:/Users/Kamel/Seafile/CNN-Models/alexnet.caffemodel"
-    layer_name = 'conv1'
-    fit_rpt_filename = "Results/alexnet_conv1_6bits.txt"
+    proto_file = "C:/Users/Kamel/Seafile/CNN-Models/vgg16.prototxt"
+    model_file = "C:/Users/Kamel/Seafile/CNN-Models/vgg16.caffemodel"
+    layer_name = 'conv2_1'
+    fit_rpt_filename = "Results/vgg16_conv2_1_6bits.txt"
     bitwidth = 6
 
     net = caffe.Net(proto_file,model_file,caffe.TEST)

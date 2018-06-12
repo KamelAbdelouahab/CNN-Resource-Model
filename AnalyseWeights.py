@@ -25,7 +25,7 @@ def DistanceOfOnes(bin_rep):
 def isPowerTwo(num):
     return num !=0 and ((num & (num - 1)) == 0)
 
-def nbNegative(kernel):
+def nbNgtv(kernel):
     nb_ngtv = 0
     for c in range(kernel.shape[0]):
         for j in range(kernel.shape[1]):
@@ -33,7 +33,7 @@ def nbNegative(kernel):
                 nb_ngtv += (kernel[c,j,k] < 0)
     return nb_ngtv
 
-def nbPowerTwo(kernel):
+def nbPow2(kernel):
     nb_pow2 = 0
     for c in range(kernel.shape[0]):
         for j in range(kernel.shape[1]):
@@ -41,7 +41,7 @@ def nbPowerTwo(kernel):
                 nb_pow2 += int(isPowerTwo(kernel[c,j,k]))
     return nb_pow2
 
-def nbOnes(kernel,bitwidth):
+def nbBit1(kernel,bitwidth):
     nb_ones = 0
     for c in range(kernel.shape[0]):
         for j in range(kernel.shape[1]):
@@ -62,9 +62,9 @@ def kernelStatsTotal(conv_layer,bitwidth):
     conv_layer = quantizeWeight(conv_layer,bitwidth)
     for n in range(conv_layer.shape[0]):
         nb_null += nbNull(conv_layer[n,:])
-        nb_ngtv += nbNegative(conv_layer[n,:])
-        nb_pow2 += nbPowerTwo(conv_layer[n,:])
-        nb_bit1 += nbOnes(conv_layer[n,:], bitwidth)
+        nb_ngtv += nbNgtv(conv_layer[n,:])
+        nb_pow2 += nbPow2(conv_layer[n,:])
+        nb_bit1 += nbBit1(conv_layer[n,:], bitwidth)
 
     nb_null = 100* nb_null / conv_layer.size
     nb_ngtv = 100* nb_ngtv / conv_layer.size
@@ -87,9 +87,9 @@ def kernelStats(conv_layer,bitwidth):
     conv_layer = quantizeWeight(conv_layer,bitwidth)
     for n in range(conv_layer.shape[0]):
         nb_null[n] = nbNull(conv_layer[n,:])
-        nb_pow2[n] = nbPowerTwo(conv_layer[n,:])
-        nb_ngtv[n] = nbNegative(conv_layer[n,:])
-        nb_bit1[n] = nbOnes(conv_layer[n,:], bitwidth)
+        nb_pow2[n] = nbPow2(conv_layer[n,:])
+        nb_ngtv[n] = nbNgtv(conv_layer[n,:])
+        nb_bit1[n] = nbBit1(conv_layer[n,:], bitwidth)
 
     return nb_null, nb_ngtv, nb_pow2, nb_bit1
 
@@ -99,6 +99,17 @@ def removeShit(nb_alm):
     nb_alm[91] = 280
     nb_alm[93] = 380
     return nb_alm
+
+def isNull(kernel):
+    return (np.count_nonzero(kernel) == 0)
+
+def whereNull(conv,bitwidth):
+    conv = quantizeWeight(conv,bitwidth)
+    l = []
+    for n in range(conv.shape[0]):
+        if(isNull(conv[n,:])):
+            l.append(n)
+    return l
 
 if __name__ == '__main__':
     proto_file = "C:/Users/Kamel/Seafile/CNN-Models/alexnet.prototxt"
