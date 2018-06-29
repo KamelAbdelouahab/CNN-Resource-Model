@@ -9,6 +9,13 @@ def quantizeWeight(float_weight,bitwidth):
     scaled_data = np.round(float_weight * scale_factor)
     return np.array(scaled_data, dtype=int)
 
+def histogram(weights, bitwidth):
+    weights = quantizeWeight(weights,bitwidth)
+    plt.hist(weights.flatten(), bins='auto')
+    plt.title("Histogram of weights. Quantized with %d Bits" %(bitwidth))
+    plt.show()
+
+
 def NumberOfOnes(num,bitwidth):
     bin_rep = np.binary_repr(int(num), width=bitwidth)
     return len([c for c in bin_rep if c =='1'])
