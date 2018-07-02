@@ -67,20 +67,32 @@ def resourceByEntity(fit_rpt_filename):
     # plt.show()
     # ##plt.savefig(save_path)
 
-def modelMOA(conv, bitwidth, fit_rpt_filename):
+def modelMOA(conv, bias, bitwidth, fit_rpt_filename):
     # Builds a model of the hardware cost of Multi-Operand Adders
     nb_null, nb_ngtv, nb_pow2, nb_bit1  = AnalyseWeights.kernelStats(conv, bitwidth)
+    sum_pp_bitwidth = AnalyseWeights.ppBitwidth(conv, bias, bitwidth)
     where_full_null = AnalyseWeights.whereNull(conv, bitwidth)
     instance_name = ";          |MOA:MOA_i|"
     alm = AlteraUtils.getALM(fit_rpt_filename, instance_name)
     nb_alm = np.array(list(alm.items()))[:,1]
     nb_alm = np.insert(nb_alm, 0, where_full_null)
 
-    ## Removing irrational costs
-    # nb_alm[91] = 1170
-    # nb_alm[93] = 730
+    # plt.scatter(nb_bit1, nb_alm, marker='o')
+    # plt.plot(nb_bit1, slope*(nb_bit1) + intercept, color='red')
+    # plt.show()
 
-    X = np.array([nb_null, nb_pow2], dtype=float)
+    ## Linear regression
+    print('\nMOA Model ===================================================')
+    slope, intercept, r_value, p_value, std_err = stats.linregress(nb_null, nb_alm)
+    rho, pval = stats.spearmanr(nb_null, nb_alm)
+    print( "Modeled MOA with nb_null LR, %s = %.4f, p = %.4f" % ("r²", r_value**2, rho))
+
+    slope, intercept, r_value, p_value, std_err = stats.linregress(sum_pp_bitwidth, nb_alm)
+    rho, pval = stats.spearmanr(sum_pp_bitwidth, nb_alm) # 0.94
+    print( "Modeled MOA with sum_pp_bitwidth LR, %s = %.4f, p = %.4f" % ("r²", r_value**2, rho))
+
+    # Linear Model
+    X = np.array([nb_null, sum_pp_bitwidth], dtype=float)
     X = X.T
 
     ## Multiple Linear Regression
@@ -89,36 +101,23 @@ def modelMOA(conv, bitwidth, fit_rpt_filename):
     coefs = clf.coef_
     Y = clf.predict(X)
 
-    # plt.scatter(nb_bit1, nb_alm, marker='o')
-    # plt.plot(nb_bit1, slope*(nb_bit1) + intercept, color='red')
-    # plt.show()
-
-    ## Linear regression
-    print('\nMOA Model ===================================================')
-    slope, intercept, r_value, p_value, std_err = stats.linregress(nb_pow2, nb_alm)
-    rho, pval = stats.spearmanr(nb_pow2, nb_alm)
-    print( "Modeled MOA with nb_pow2 LR, %s = %.4f, p = %.4f" % ("r²", r_value**2, rho))
-
-    slope, intercept, r_value, p_value, std_err = stats.linregress(nb_bit1, nb_alm)
-    rho, pval = stats.spearmanr(nb_bit1, nb_alm)
-    print( "Modeled MOA with nb_bit1 LR, %s = %.4f, p = %.4f" % ("r²", r_value**2, rho))
-
-    slope, intercept, r_value, p_value, std_err = stats.linregress(nb_null, nb_alm)
-    rho, pval = stats.spearmanr(nb_null, nb_alm)
-    print( "Modeled MOA with nb_null LR, %s = %.4f, p = %.4f" % ("r²", r_value**2, rho))
-
     rho, pval = stats.spearmanr(Y, nb_alm)
     print( "Modeled MOA with CLR, %s = %.4f, p = %.4f" % ("r²", clf.score(X, nb_alm), rho))
 
-    ## 3D Plot
-    from mpl_toolkits.mplot3d import Axes3D
+
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(nb_null, nb_pow2, nb_alm)
-    ax.set_xlabel('Number of Nulls/Kernel')
-    ax.set_ylabel('Number of Pow2/Kernel')
-    ax.set_zlabel('Resource (ALMs)')
+    plt.scatter(sum_pp_bitwidth, nb_alm)
+    plt.axis([0, np.max(sum_pp_bitwidth), 0, np.max(nb_alm)])
     plt.show()
+    ## 3D Plot
+    # from mpl_toolkits.mplot3d import Axes3D
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
+    # ax.scatter(nb_null, nb_pow2, nb_alm)
+    # ax.set_xlabel('Number of Nulls/Kernel')
+    # ax.set_ylabel('Number of Pow2/Kernel')
+    # ax.set_zlabel('Resource (ALMs)')
+    # plt.show()
 
 def modelSCM(conv, bitwidth, fit_rpt_filename):
     # Builds a model of the hardware cost of Single Constant Multiplier
@@ -189,21 +188,25 @@ def profileKernel(conv_layer, fit_rpt_filename, bitwidth):
             print(AnalyseWeights.quantizeWeight(conv_layer[n], bitwidth))
 
 if __name__ == '__main__':
-    proto_file = "C:/Users/Kamel/Seafile/CNN-Models/alexnet.prototxt"
-    model_file = "C:/Users/Kamel/Seafile/CNN-Models/alexnet.caffemodel"
-    layer_name = 'conv1'
-    fit_rpt_filename = "Results/alexnet_conv1_6bits.txt"
+    proto_file = "C:/Users/Kamel/Seafile/CNN-Models/vgg16.prototxt"
+    model_file = "C:/Users/Kamel/Seafile/CNN-Models/vgg16.caffemodel"
+    layer_name = 'conv1_2'
+    fit_rpt_filename = "Results/vgg16_conv1-2_6bits.txt"
     bitwidth = 6
 
     net = caffe.Net(proto_file,model_file,caffe.TEST)
     conv = net.params[layer_name][0].data
+    bias = net.params[layer_name][1].data
 
     print("Model:" + model_file)
     print("Layer:" + layer_name)
     print("Bitwidth:" + str(bitwidth))
 
-    AnalyseWeights.kernelStatsTotal(conv, bitwidth)
-    resourceByEntity(fit_rpt_filename)
-    paramCorrelation(conv, bitwidth, fit_rpt_filename)
-    modelMOA(conv, bitwidth, fit_rpt_filename)
-    modelSCM(conv, bitwidth, fit_rpt_filename)
+    # AnalyseWeights.kernelStatsTotal(conv, bitwidth)
+    # resourceByEntity(fit_rpt_filename)
+    # paramCorrelation(conv, bitwidth, fit_rpt_filename)
+    modelMOA(conv=conv,
+             bias=bias,
+             bitwidth=bitwidth,
+             fit_rpt_filename=fit_rpt_filename)
+    # modelSCM(conv, bitwidth, fit_rpt_filename)

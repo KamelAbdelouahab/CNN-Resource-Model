@@ -15,11 +15,9 @@ def histogram(weights, bitwidth):
     plt.title("Histogram of weights. Quantized with %d Bits" %(bitwidth))
     plt.show()
 
-
 def NumberOfOnes(num,bitwidth):
     bin_rep = np.binary_repr(int(num), width=bitwidth)
     return len([c for c in bin_rep if c =='1'])
-
 
 def DistanceOfOnes(bin_rep):
     pos = []
@@ -100,13 +98,6 @@ def kernelStats(conv_layer,bitwidth):
 
     return nb_null, nb_ngtv, nb_pow2, nb_bit1
 
-def removeShit(nb_alm):
-    nb_alm[1] = 410
-    nb_alm[87] = 420
-    nb_alm[91] = 280
-    nb_alm[93] = 380
-    return nb_alm
-
 def isNull(kernel):
     return (np.count_nonzero(kernel) == 0)
 
@@ -117,6 +108,22 @@ def whereNull(conv,bitwidth):
         if(isNull(conv[n,:])):
             l.append(n)
     return l
+
+def ppBitwidth(conv, bias, bitwidth):
+    # Returns the number of bits at the output of each mult
+    conv = quantizeWeight(conv,bitwidth)
+    bias = quantizeWeight(bias,bitwidth)
+    sum_pp_bitwidth = np.zeros(conv.shape[0])
+    for n in range (sum_pp_bitwidth.shape[0]):
+        kernel = conv[n]
+        bitwidth_extension = np.zeros(kernel.shape)
+        bitwidth_extension [kernel != 0] = bitwidth
+        bitwidth_extension [kernel != 0] += np.round(np.log2(np.abs(kernel[kernel != 0])))
+        sum_pp_bitwidth[n] =  np.sum(bitwidth_extension)
+        if(bias[n]!=0):
+            sum_pp_bitwidth[n] += np.round(np.log2(np.abs(bias[n])))
+    return sum_pp_bitwidth
+
 
 if __name__ == '__main__':
     proto_file = "C:/Users/Kamel/Seafile/CNN-Models/alexnet.prototxt"
@@ -130,7 +137,9 @@ if __name__ == '__main__':
     print("Model:" + model_file)
     print("Layer:" + layer_name)
     print("Bitwidth:" + str(bitwidth))
-    nb_null, nb_ngtv, nb_pow2 , nb_ones= kernelStatsTotal(conv_layer, bitwidth)
+    B = ppBitwidth(conv_layer,bitwidth)
+    print(B)
+    # nb_null, nb_ngtv, nb_pow2 , nb_ones= kernelStatsTotal(conv_layer, bitwidth)
     # nb_null, nb_ngtv, nb_pow2,nb_bit1  = kernelStats(conv_layer, bitwidth)
     # alm = 0.9 * np.random.rand(conv_layer.shape[0])
     # plt.scatter(nb_pow2,alm)
