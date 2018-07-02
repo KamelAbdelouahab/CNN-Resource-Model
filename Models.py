@@ -18,6 +18,34 @@ params = {
    }
 rcParams.update(params)
 
+def plotLinearModel(x, y, slope, intercept, label, r2):
+    from matplotlib import rcParams
+    params = {
+       'axes.labelsize': 8,
+       'font.size': 8,
+       'legend.fontsize': 10,
+       'xtick.labelsize': 10,
+       'ytick.labelsize': 10,
+       'figure.figsize': [4.5, 4.5],
+       'axes.facecolor' : 'white'
+       }
+    rcParams.update(params)
+    r2_str = ("%.2f" %r2)
+    plt.figure(0)
+    plt.grid()
+    plt.scatter(x, y,
+                marker='o',
+                label=label)
+    plt.plot(np.sort(x),
+            slope*np.sort(x) + intercept,
+            linewidth=2,
+            color='#B22400',
+            label= "r$^2$ = " + r2_str)
+    legend = plt.legend(loc=2)
+    plt.xlabel('')
+    plt.ylabel('Logic Resources (ALMs)')
+    #plt.text(10, 40, "r$^2$ = "+ r2_str, fontsize=15, color='red')
+    plt.show()
 
 def dispMetaData(caffe_net, layer, bitwidth):
     print("=================================")
@@ -36,7 +64,7 @@ def linearRegs(X, nb_alm):
     slope, intercept, r_value, p_value, std_err = stats.linregress(X[:,3], nb_alm)
     print("\tnb_bit1\t%.4f " % (r_value**2))
     slope, intercept, r_value, p_value, std_err = stats.linregress(X[:,2], nb_alm)
-    return (slope, intercept)
+    return (slope, intercept, r_value)
 
 def genLinearReg(X, nb_alm):
     from sklearn import linear_model
@@ -128,9 +156,10 @@ def modelMOA(conv, bias, bitwidth, fit_rpt_filename):
     X = X.T
 
     print("MOA Model: R-squared")
-    linearRegs(X, nb_alm)
+    [slope, intercept, r2] = linearRegs(X, nb_alm)
     genLinearReg(X, nb_alm)
     #ordinaryLeastSquares(X, nb_alm)
+    plotLinearModel(nb_efbw, nb_alm, slope, intercept, "MOA", r2)
 
 def modelSCM(conv, bias, bitwidth, fit_rpt_filename):
     # Builds a model of the hardware cost of Single Constant Multiplier
@@ -144,9 +173,10 @@ def modelSCM(conv, bias, bitwidth, fit_rpt_filename):
     nb_alm = np.array(list(alm.items()))[:,1]
     nb_alm = np.insert(nb_alm, 0, where_full_null)
     print("SCM Model: R-squared")
-    linearRegs(X, nb_alm)
+    [slope, intercept, r2] = linearRegs(X, nb_alm)
     genLinearReg(X, nb_alm)
     #ordinaryLeastSquares(X, nb_alm)
+    plotLinearModel(nb_efbw, nb_alm, slope, intercept, "SCM", r2)
 
 def profileKernel(conv_layer, fit_rpt_filename, bitwidth):
     # Display the value of the less "resource-intensive" kernels
@@ -166,7 +196,7 @@ def profileKernel(conv_layer, fit_rpt_filename, bitwidth):
 
 def main():
     network_names = ['alexnet', 'squeezenet', 'alexnet_compressed', 'vgg16']
-    # network_names = ['alexnet', 'squeezenet', 'alexnet_compressed']
+    network_names = ['alexnet', 'squeezenet', 'alexnet_compressed']
     model_root = "C:/Users/Kamel/Seafile/CNN-Models/"
     bitwidth = 6
     for network_name in network_names:
@@ -185,8 +215,8 @@ def main():
             net = caffe.Net(proto_file,model_file,caffe.TEST)
             conv = net.params[layer_name][0].data
             bias = net.params[layer_name][1].data
-            AnalyseWeights.kernelStatsTotal(conv, bitwidth)
-            resourceByEntity(fit_rpt_filename)
+            # AnalyseWeights.kernelStatsTotal(conv, bitwidth)
+            # resourceByEntity(fit_rpt_filename)
             modelMOA(conv=conv,
                      bias=bias,
                      bitwidth=bitwidth,
