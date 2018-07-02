@@ -2,6 +2,8 @@ import numpy as np
 import AlteraUtils
 import Models
 import matplotlib.pyplot as plt
+import os
+os.environ['GLOG_minloglevel'] = '2'
 import caffe
 
 def quantizeWeight(float_weight,bitwidth):
@@ -10,9 +12,26 @@ def quantizeWeight(float_weight,bitwidth):
     return np.array(scaled_data, dtype=int)
 
 def histogram(weights, bitwidth):
+    import matplotlib.pyplot as plt
+    from matplotlib import rcParams
+    params = {
+       'axes.labelsize': 10,
+       'font.size': 10,
+       'legend.fontsize': 12,
+       'xtick.labelsize': 12,
+       'ytick.labelsize': 12,
+       'figure.figsize': [4.5, 4.5],
+       'axes.facecolor' : 'white'
+       }
+    rcParams.update(params)
+
     weights = quantizeWeight(weights,bitwidth)
-    plt.hist(weights.flatten(), bins='auto')
-    plt.title("Histogram of weights. Quantized with %d Bits" %(bitwidth))
+    weights = weights/(2**(bitwidth-1) - 1)
+    plt.hist(weights.flatten(), bins=200)
+    #plt.title("Histogram of weights. Quantized with %d Bits" %(bitwidth))
+    plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+    plt.axis([-0.3, 0.3, 0, 6000])
+    plt.grid()
     plt.show()
 
 def NumberOfOnes(num,bitwidth):
@@ -70,17 +89,16 @@ def kernelStatsTotal(conv_layer,bitwidth):
         nb_ngtv += nbNgtv(conv_layer[n,:])
         nb_pow2 += nbPow2(conv_layer[n,:])
         nb_bit1 += nbBit1(conv_layer[n,:], bitwidth)
-
     nb_null = 100* nb_null / conv_layer.size
     nb_ngtv = 100* nb_ngtv / conv_layer.size
     nb_pow2 = 100* nb_pow2 / conv_layer.size
     nb_bit1 = 100* nb_bit1 / (conv_layer.size*bitwidth)
-    print('=============================================================')
-    print( "%s: %d " % ("Number of weights", conv_layer.size))
-    print( "%s:\t %.2f %%" % ("Pourcentage of Null Kernels", nb_null))
-    print( "%s:\t %.2f %%" % ("Pourcentage of Power2 Kernels", nb_pow2))
-    print( "%s: %.2f %%" % ("Pourcentage of Negative Kernels", nb_ngtv))
-    print( "%s:\t\t %.2f %%" % ("Pourcentage of Bits=1", nb_bit1))
+    print('Kernel Stats')
+    print( "%s\t%d "     % ("\tWeights", conv_layer.size))
+    print( "%s\t%.2f %%" % ("\tnb_null", nb_null))
+    print( "%s\t%.2f %%" % ("\tnb_pow2", nb_pow2))
+    print( "%s\t%.2f %%" % ("\tnb_ngtv", nb_ngtv))
+    print( "%s\t%.2f %%" % ("\tnb_bit1", nb_bit1))
     return nb_null, nb_ngtv, nb_pow2, nb_bit1
 
 def kernelStats(conv_layer,bitwidth):
@@ -88,14 +106,12 @@ def kernelStats(conv_layer,bitwidth):
     nb_ngtv = np.zeros(conv_layer.shape[0], dtype=int)
     nb_bit1 = np.zeros(conv_layer.shape[0], dtype=int)
     nb_null = np.zeros(conv_layer.shape[0], dtype=int)
-
     conv_layer = quantizeWeight(conv_layer,bitwidth)
     for n in range(conv_layer.shape[0]):
         nb_null[n] = nbNull(conv_layer[n,:])
         nb_pow2[n] = nbPow2(conv_layer[n,:])
         nb_ngtv[n] = nbNgtv(conv_layer[n,:])
         nb_bit1[n] = nbBit1(conv_layer[n,:], bitwidth)
-
     return nb_null, nb_ngtv, nb_pow2, nb_bit1
 
 def isNull(kernel):
@@ -126,22 +142,18 @@ def ppBitwidth(conv, bias, bitwidth):
 
 
 if __name__ == '__main__':
+    bitwidth = 8
     proto_file = "C:/Users/Kamel/Seafile/CNN-Models/alexnet.prototxt"
     model_file = "C:/Users/Kamel/Seafile/CNN-Models/alexnet.caffemodel"
     layer_name = 'conv1'
-    bitwidth = 6
-
     net = caffe.Net(proto_file,model_file,caffe.TEST)
     conv_layer = net.params[layer_name][0].data
-    print('=======================================')
-    print("Model:" + model_file)
-    print("Layer:" + layer_name)
-    print("Bitwidth:" + str(bitwidth))
-    B = ppBitwidth(conv_layer,bitwidth)
-    print(B)
-    # nb_null, nb_ngtv, nb_pow2 , nb_ones= kernelStatsTotal(conv_layer, bitwidth)
-    # nb_null, nb_ngtv, nb_pow2,nb_bit1  = kernelStats(conv_layer, bitwidth)
-    # alm = 0.9 * np.random.rand(conv_layer.shape[0])
-    # plt.scatter(nb_pow2,alm)
-    # plt.axis([0, 100, 0, 1])
-    # plt.show()
+    kernelStatsTotal(conv_layer,bitwidth)
+    histogram(conv_layer, bitwidth)
+
+    proto_file = "C:/Users/Kamel/Seafile/CNN-Models/alexnet_compressed.prototxt"
+    model_file = "C:/Users/Kamel/Seafile/CNN-Models/alexnet_compressed.caffemodel"
+    net = caffe.Net(proto_file,model_file,caffe.TEST)
+    conv_layer = net.params[layer_name][0].data
+    kernelStatsTotal(conv_layer,bitwidth)
+    histogram(conv_layer, bitwidth)
