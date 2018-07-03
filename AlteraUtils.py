@@ -1,5 +1,6 @@
 import sys
 import os
+import numpy as np
 
 def getSummaryALM(fit_filename):
     fp = open(fit_filename)
@@ -38,7 +39,7 @@ def getALM(fit_rpt_filename,instance_name):
     num_alm = list(map(float,num_alm))
     instance_number = listAsQuartus(instance_occur)
     d = (dict(zip(instance_number,num_alm)))
-    return d
+    return np.array(list(d.items()))[:,1]
 
 def getALMStop(fit_rpt_filename,instance_name, stop_inst_name):
     num_alm_pos = 6          # Number of ALMs used is the 6th word of the line

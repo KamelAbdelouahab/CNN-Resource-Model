@@ -1,10 +1,11 @@
 import numpy as np
 import AlteraUtils
 import AnalyseWeights
-from scipy import stats
+#from scipy import stats
 import os
 os.environ['GLOG_minloglevel'] = '4'
 import caffe
+
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 params = {
@@ -18,11 +19,40 @@ params = {
    }
 rcParams.update(params)
 
-def plotLinearModel(x, y, slope, intercept, label, r2):
+def importLayerParams(network_name, layer_name, bitwidth):
+    model_root = "C:/Users/Kamel/Seafile/CNN-Models/"
+    proto_file = model_root + network_name + ".prototxt"
+    model_file = model_root + network_name + ".caffemodel"
+    dispMetaData(network_name, layer_name, bitwidth)
+    net = caffe.Net(proto_file,model_file,caffe.TEST)
+    conv = net.params[layer_name][0].data
+    bias = net.params[layer_name][1].data
+    return [conv, bias]
+
+def importFitReport(network_name, layer_name, bitwidth):
+    fit_rpt_filename =  "Results/"
+    fit_rpt_filename +=  network_name
+    fit_rpt_filename +=  "-" + layer_name
+    fit_rpt_filename +=  "-" + str(bitwidth) + "bits.txt"
+    return fit_rpt_filename
+
+def generateFeatures(conv, bias, bitwidth):
+    nb_null, nb_ngtv, nb_pow2, nb_bit1  = AnalyseWeights.kernelStats(conv, bitwidth)
+    nb_efbw = AnalyseWeights.ppBitwidth(conv, bias, bitwidth)
+    X = np.array([nb_null, nb_pow2, nb_efbw, nb_bit1], dtype=float)
+    X = X.T
+    return X
+
+def correctEntityALM(conv, nb_alm, bitwidth):
+    where_full_null = AnalyseWeights.whereNull(conv, bitwidth)
+    nb_alm = np.insert(nb_alm, 0, where_full_null)
+    return nb_alm
+
+def plotLinearModel(x, y, coef,  label, r2, out_pdf):
     from matplotlib import rcParams
     params = {
-       'axes.labelsize': 8,
-       'font.size': 8,
+       'axes.labelsize': 10,
+       'font.size': 10,
        'legend.fontsize': 10,
        'xtick.labelsize': 10,
        'ytick.labelsize': 10,
@@ -30,22 +60,22 @@ def plotLinearModel(x, y, slope, intercept, label, r2):
        'axes.facecolor' : 'white'
        }
     rcParams.update(params)
-    r2_str = ("%.2f" %r2)
-    plt.figure(0)
+    lm_stats_str = ("s=%.2f, r$^2$=%.4f" %(coef[0],r2))
+    plt.figure()
     plt.grid()
     plt.scatter(x, y,
                 marker='o',
                 label=label)
-    plt.plot(np.sort(x),
-            slope*np.sort(x) + intercept,
+    xlm = np.linspace(0, np.max(x), 100)
+    plt.plot(xlm,
+            coef[0]*xlm,
             linewidth=2,
             color='#B22400',
-            label= "r$^2$ = " + r2_str)
+            label= lm_stats_str)
     legend = plt.legend(loc=2)
-    plt.xlabel('')
-    plt.ylabel('Logic Resources (ALMs)')
-    #plt.text(10, 40, "r$^2$ = "+ r2_str, fontsize=15, color='red')
-    plt.show()
+    plt.axis([0, np.max(xlm), 0, np.max(y)])
+    plt.savefig(out_pdf, bbox_inches ='tight')
+    #plt.show()
 
 def dispMetaData(caffe_net, layer, bitwidth):
     print("=================================")
@@ -54,24 +84,27 @@ def dispMetaData(caffe_net, layer, bitwidth):
     print("Bitwidth:" + str(bitwidth))
     print("=================================")
 
-def linearRegs(X, nb_alm):
-    slope, intercept, r_value, p_value, std_err = stats.linregress(X[:,0], nb_alm)
-    print("\tnb_null\t%.4f " % (r_value**2))
-    slope, intercept, r_value, p_value, std_err = stats.linregress(X[:,1], nb_alm)
-    print("\tnb_pow2\t%.4f " % (r_value**2))
-    slope, intercept, r_value, p_value, std_err = stats.linregress(X[:,2], nb_alm)
-    print("\tnb_efbw\t%.4f " % (r_value**2))
-    slope, intercept, r_value, p_value, std_err = stats.linregress(X[:,3], nb_alm)
-    print("\tnb_bit1\t%.4f " % (r_value**2))
-    slope, intercept, r_value, p_value, std_err = stats.linregress(X[:,2], nb_alm)
-    return (slope, intercept, r_value)
-
-def genLinearReg(X, nb_alm):
+def sklearnLinearRegression(X, y):
+    import pandas as pd
     from sklearn import linear_model
-    lm = linear_model.LinearRegression()
-    lm.fit(X, nb_alm)
-    print("\tGLMs\t%.4f \n" % (lm.score(X, nb_alm)))
-    print("\n")
+    lm = linear_model.LinearRegression(fit_intercept=False)
+    lm.fit(pd.DataFrame(X), pd.DataFrame(y))
+    return (lm.coef_, lm.score(pd.DataFrame(X), pd.DataFrame(y)))
+
+def linearRegs(X, nb_alm):
+    coef = np.zeros(X.shape)
+    coef[0], r_squared = sklearnLinearRegression(X[:,0], nb_alm)
+    print("\tnb_null\t%.4f " % (r_squared))
+    coef[0], r_squared = sklearnLinearRegression(X[:,1], nb_alm)
+    print("\tnb_pow2\t%.4f " % (r_squared))
+    coef[0], r_squared = sklearnLinearRegression(X[:,3], nb_alm)
+    print("\tnb_bit1\t%.4f " % (r_squared))
+    coef[0], r_squared = sklearnLinearRegression(X[:,2], nb_alm)
+    print("\tnb_efbw\t%.4f " % (r_squared))
+    [coef_efbw, r_squared_efbw] = [coef[0], r_squared]
+    coef, r_squared = sklearnLinearRegression(X, nb_alm)
+    print("\tMultiVariate%.4f " % (r_squared))
+    return (coef_efbw, r_squared_efbw)
 
 def ordinaryLeastSquares(X, nb_alm):
     import statsmodels.api as sm
@@ -96,17 +129,17 @@ def paramCorrelation(conv, bitwidth, fit_rpt_filename):
     nb_null, nb_ngtv, nb_pow2, nb_bit1  = AnalyseWeights.kernelStats(conv, bitwidth)
     ## Correlation between metrics
     print('\nCorrelation between metrics:=================================')
-    slope, intercept, r_value, p_value, std_err = stats.linregress(nb_pow2, nb_bit1)
+    coef, r_squared = stats.linregress(nb_pow2, nb_bit1)
     rho, pval = stats.spearmanr(nb_pow2, nb_bit1)
-    print("Correlation nb_pow2 and nb_bit1, r2 = %.4f , p = %.4f" % (r_value**2, rho))
+    print("Correlation nb_pow2 and nb_bit1, r2 = %.4f , p = %.4f" % (r_squared, rho))
 
-    slope, intercept, r_value, p_value, std_err = stats.linregress(nb_null, nb_bit1)
+    coef, r_squared = stats.linregress(nb_null, nb_bit1)
     rho, pval = stats.spearmanr(nb_null, nb_bit1)
-    print("Correlation nb_null and nb_bit1, r2 = %.4f , p = %.4f" % (r_value**2, rho))
+    print("Correlation nb_null and nb_bit1, r2 = %.4f , p = %.4f" % (r_squared, rho))
 
-    slope, intercept, r_value, p_value, std_err = stats.linregress(nb_null, nb_pow2)
+    coef, r_squared = stats.linregress(nb_null, nb_pow2)
     rho, pval = stats.spearmanr(nb_null, nb_pow2)
-    print("Correlation nb_null and nb_pow2, r2 = %.4f , p = %.4f" % (r_value**2, rho))
+    print("Correlation nb_null and nb_pow2, r2 = %.4f , p = %.4f" % (r_squared, rho))
 
 def resourceByEntity(fit_rpt_filename):
     # Displays the hardware resources allocated to each entity and plots their histogram
@@ -145,38 +178,41 @@ def resourceByEntity(fit_rpt_filename):
 
 def modelMOA(conv, bias, bitwidth, fit_rpt_filename):
     # Builds a model of the hardware cost of Multi-Operand Adders
-    nb_null, nb_ngtv, nb_pow2, nb_bit1  = AnalyseWeights.kernelStats(conv, bitwidth)
-    nb_efbw = AnalyseWeights.ppBitwidth(conv, bias, bitwidth)
-    where_full_null = AnalyseWeights.whereNull(conv, bitwidth)
+    ## Generate the features : nb_pow2, nb_null, nb_bit1, nb_efbw
+    X = generateFeatures(conv, bias, bitwidth)
+    ## Read Fitting report and get ALM per MOA instance
     instance_name = ";          |MOA:MOA_i|"
-    alm = AlteraUtils.getALM(fit_rpt_filename, instance_name)
-    nb_alm = np.array(list(alm.items()))[:,1]
-    nb_alm = np.insert(nb_alm, 0, where_full_null)
-    X = np.array([nb_null, nb_pow2, nb_efbw, nb_bit1], dtype=float)
-    X = X.T
-
+    nb_alm = AlteraUtils.getALM(fit_rpt_filename, instance_name)
+    nb_alm = correctEntityALM(conv, nb_alm, bitwidth)
+    ## Linear Regression with all features ones by one
     print("MOA Model: R-squared")
-    [slope, intercept, r2] = linearRegs(X, nb_alm)
-    genLinearReg(X, nb_alm)
-    #ordinaryLeastSquares(X, nb_alm)
-    plotLinearModel(nb_efbw, nb_alm, slope, intercept, "MOA", r2)
+    [coef_efbw,  r2] = linearRegs(X, nb_alm)
+    ## Plot Linear Model results with nb_efbw
+    out_pdf = fit_rpt_filename.split('.')[0]
+    out_pdf += "-MOA.pdf"
+    nb_efbw = X[:,2]
+    plotLinearModel(nb_efbw, nb_alm, coef_efbw,  "MOA", r2, out_pdf)
+    ## Return Multi-variate linear model coefs
+    return sklearnLinearRegression(X, nb_alm)
 
 def modelSCM(conv, bias, bitwidth, fit_rpt_filename):
     # Builds a model of the hardware cost of Single Constant Multiplier
-    nb_null, nb_ngtv, nb_pow2, nb_bit1  = AnalyseWeights.kernelStats(conv, bitwidth)
-    where_full_null = AnalyseWeights.whereNull(conv, bitwidth)
-    nb_efbw = AnalyseWeights.ppBitwidth(conv, bias, bitwidth)
-    X = np.array([nb_null, nb_pow2, nb_efbw, nb_bit1], dtype=float)
-    X = X.T
+    ## Generate the features : nb_pow2, nb_null, nb_bit1, nb_efbw
+    X = generateFeatures(conv, bias, bitwidth)
+    ## Read Fitting report and get ALM per MOA instance
     instance_name = ";          |MCM:MCM_i|"
-    alm = AlteraUtils.getALM(fit_rpt_filename, instance_name)
-    nb_alm = np.array(list(alm.items()))[:,1]
-    nb_alm = np.insert(nb_alm, 0, where_full_null)
+    nb_alm = AlteraUtils.getALM(fit_rpt_filename, instance_name)
+    nb_alm = correctEntityALM(conv, nb_alm, bitwidth)
+    ## Linear Regression with all features ones by one
     print("SCM Model: R-squared")
-    [slope, intercept, r2] = linearRegs(X, nb_alm)
-    genLinearReg(X, nb_alm)
-    #ordinaryLeastSquares(X, nb_alm)
-    plotLinearModel(nb_efbw, nb_alm, slope, intercept, "SCM", r2)
+    [coef_efbw,  r2] = linearRegs(X, nb_alm)
+    ## Plot Linear Model results with nb_efbw
+    out_pdf = fit_rpt_filename.split('.')[0]
+    out_pdf += "-SCM.pdf"
+    nb_efbw = X[:,2]
+    plotLinearModel(nb_efbw, nb_alm, coef_efbw,  "SCM", r2, out_pdf)
+    ## Return Multi-variate linear model coefs
+    return sklearnLinearRegression(X, nb_alm)
 
 def profileKernel(conv_layer, fit_rpt_filename, bitwidth):
     # Display the value of the less "resource-intensive" kernels
@@ -196,7 +232,7 @@ def profileKernel(conv_layer, fit_rpt_filename, bitwidth):
 
 def main():
     network_names = ['alexnet', 'squeezenet', 'alexnet_compressed', 'vgg16']
-    network_names = ['alexnet', 'squeezenet', 'alexnet_compressed']
+    network_names = ['alexnet', 'squeezenet', 'alexnet_compressed', 'vgg16']
     model_root = "C:/Users/Kamel/Seafile/CNN-Models/"
     bitwidth = 6
     for network_name in network_names:
@@ -205,16 +241,8 @@ def main():
         else:
             layer_names = ['conv1']
         for layer_name in layer_names:
-            proto_file = model_root + network_name + ".prototxt"
-            model_file = model_root + network_name + ".caffemodel"
-            fit_rpt_filename =  "Results/"
-            fit_rpt_filename +=  network_name
-            fit_rpt_filename +=  "-" + layer_name
-            fit_rpt_filename +=  "-" + str(bitwidth) + "bits.txt"
-            dispMetaData(network_name, layer_name, bitwidth)
-            net = caffe.Net(proto_file,model_file,caffe.TEST)
-            conv = net.params[layer_name][0].data
-            bias = net.params[layer_name][1].data
+            [conv, bias] = importLayerParams(network_name, layer_name, bitwidth)
+            fit_rpt_filename = importFitReport(network_name, layer_name, bitwidth)
             # AnalyseWeights.kernelStatsTotal(conv, bitwidth)
             # resourceByEntity(fit_rpt_filename)
             modelMOA(conv=conv,
