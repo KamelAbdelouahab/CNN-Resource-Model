@@ -74,8 +74,8 @@ def plotLinearModel(x, y, coef,  label, r2, out_pdf):
             label= lm_stats_str)
     legend = plt.legend(loc=2)
     plt.axis([0, np.max(xlm), 0, np.max(y)])
-    plt.savefig(out_pdf, bbox_inches ='tight')
-    #plt.show()
+    #plt.savefig(out_pdf, bbox_inches ='tight')
+    plt.show()
 
 def dispMetaData(caffe_net, layer, bitwidth):
     print("=================================")
