@@ -13,7 +13,7 @@ We rely on linear models to predict the logic resource (reported in ALMs) genera
   - Finally, the accumulation of these partial terms is achieved with a MOA that inputs respectively 9, 13 and 16 bits. The circuitry of this adder has thus a complexity that is correlated to the number of partial products and their numerical dynamic, which in turn is related to the numerical dynamic of the 3D convolution kernel weights. The `nb_efbw` of a given kernel is defined as:
   `nb_efbw = sum(bw_in + mcl(bw_theta))`.
 
-  We found that this `nb_efbw` metric is the most pertinent to model the hardware resource models, as shown in the following table, where `R_squared` scores of the models with different features are reported. The `GLM` raw corresponds to results achieved when using a generalized linear model in which all the four previous features are associated to model the resource usage.
+  We found that this `nb_efbw` metric is the most pertinent to model the hardware resource models, as shown in the following table, where `R_squared` scores of the models with different features are reported. The `GLM` stantds for the Generalized Linear Model in which all the four previous features are associated to model the resource usage.
 
 
 | MOA      | Alexnet | Squeezenet | Alexnet-Comp. |
