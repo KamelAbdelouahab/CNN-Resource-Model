@@ -7,11 +7,25 @@ def getSummaryALM(fit_filename):
     lineALM,wordALM = (7,5)             # ALM utilization is in line 8, word 6
     for i,line in enumerate(fp):
         if (i == lineALM):
-            print(line.split()[wordALM])
-            return int(line.split()[wordALM])
+            str_alm = line.split()[wordALM]
+            str_alm = str_alm.replace(",","")
+            print(str_alm)
+            return int(str_alm)
+
+def getSummaryRAM(fit_filename):
+    fp = open(fit_filename)
+    lineRAM,wordRAM = (12,4)             # RAM utilization is in line 13, word 5
+    for i,line in enumerate(fp):
+        if (i == lineRAM):
+            str_ram = line.split()[wordRAM]
+            str_ram = str_ram.replace(",","")
+            print(str_ram)
+            #print(line.split()[wordALM])
+            return int(str_ram)
 
 def quartusFit(qpf_filename):
-    QUARTUS_DIR = "C:/Intel-FPGA/quartus/bin64/"
+    # Replace with your Quartus2 dir
+    QUARTUS_DIR = "/home/kamel/intelFPGA/18.0/quartus/bin/"
     cmd = QUARTUS_DIR + "quartus_sh --flow compile " + qpf_filename
     os.system(cmd)
 
@@ -66,6 +80,9 @@ def dispSortedDict(dictionary):
         print("%s: %s" % (key, dictionary[key]))
 
 def listAsQuartus(length):
+    # This Quartus2 Cunt can't sorts the instance names correctly when using
+    # genrate. It doesnt sort them numerically, it doesnt sort them alphabetically
+    # IT SORT THEM IN SOME WIERD LOGIC !!!!
     #    0 1 10 11 12 13 14 15 16 17 18 19 2 20 21 22 23 24 25 26 27 28 29
     # -> 0 10 11 12 13 14 15 16 17 18 19 1 2 20 21 22 23 24 25 26 27 28 29
     # -> 0 10 11 12 13 14 15 16 17 18 19 1 20 21 22 23 24 25 26 27 28 29 2

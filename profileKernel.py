@@ -12,8 +12,8 @@ os.environ['GLOG_minloglevel'] = '2'
 import caffe
 
 if __name__ == '__main__':
-    proto_file = "C:/Users/Kamel/Seafile/CNN-Models/alexnet.prototxt"
-    model_file = "C:/Users/Kamel/Seafile/CNN-Models/alexnet.caffemodel"
+    proto_file = "$HOME/Seafile/CNN-Models/alexnet.prototxt"
+    model_file = "$HOME/Seafile/CNN-Models/alexnet.caffemodel"
     layer_name = 'conv1'
     fit_rpt_filename = "Results/alexnet_conv1_6bits.txt"
     bitwidth = 6
