@@ -6,6 +6,6 @@ use ieee.math_real.all;
 package types is
   ------------------------------------------------------------------------------
   -- Types
-  constant PIXEL_CONST      : integer := 6;
-  type pixel_array is array (integer range <>) of std_logic_vector (PIXEL_CONST-1 downto 0);
+  constant GENERAL_BITWIDTH      : integer := 6;
+  type pixel_array is array (integer range <>) of std_logic_vector (GENERAL_BITWIDTH-1 downto 0);
 end types;

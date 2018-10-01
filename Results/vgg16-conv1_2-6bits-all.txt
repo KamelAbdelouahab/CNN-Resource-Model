@@ -1,6 +1,101 @@
-                                                                                                                                  ; Entity Name     ; Library Name ;
+Fitter report for cnn_process
+Tue Jun 12 01:52:41 2018
+Quartus Prime Version 16.0.0 Build 211 04/27/2016 SJ Standard Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Fitter Summary
+  3. Fitter Settings
+  4. Parallel Compilation
+  5. I/O Assignment Warnings
+  6. Fitter Netlist Optimizations
+  7. Incremental Compilation Preservation Summary
+  8. Incremental Compilation Partition Settings
+  9. Incremental Compilation Placement Preservation
+ 10. Fitter Resource Usage Summary
+ 11. Input Pins
+ 12. Output Pins
+ 13. I/O Bank Usage
+ 14. All Package Pins
+ 15. Fitter Resource Utilization by Entity
+ 16. Delay Chain Summary
+ 17. Pad To Core Delay Chain Fanout
+ 18. Control Signals
+ 19. Global & Other Fast Signals
+ 20. Non-Global High Fan-Out Signals
+ 21. Fitter RAM Summary
+ 22. I/O Rules Summary
+ 23. I/O Rules Details
+ 24. I/O Rules Matrix
+ 25. Fitter Device Options
+ 26. Operating Settings and Conditions
+ 27. Fitter Messages
+ 28. Fitter Suppressed Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2016 Altera Corporation. All rights reserved.
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, the Altera Quartus Prime License Agreement,
+the Altera MegaCore Function License Agreement, or other 
+applicable license agreement, including, without limitation, 
+that your use is for the sole purpose of programming logic 
+devices manufactured by Altera and sold by Altera or its 
+authorized distributors.  Please refer to the applicable 
+agreement for further details.
+
+
+
++-----------------------------------------------------------------------------------+
+; Fitter Summary                                                                    ;
++---------------------------------+-------------------------------------------------+
+; Fitter Status                   ; Failed - Tue Jun 12 01:52:32 2018               ;
+; Quartus Prime Version           ; 16.0.0 Build 211 04/27/2016 SJ Standard Edition ;
+; Revision Name                   ; cnn_process                                     ;
+; Top-level Entity Name           ; cnn_process                                     ;
+; Family                          ; Stratix V                                       ;
+; Device                          ; 5SGXEA7N2F45C2                                  ;
+; Timing Models                   ; Final                                           ;
+; Logic utilization (in ALMs)     ; 482,797 / 234,720 ( 206 % )                     ;
+; Total registers                 ; 475249                                          ;
+; Total pins                      ; 51 / 1,064 ( 5 % )                              ;
+; Total virtual pins              ; 0                                               ;
+; Total block memory bits         ; 261,360 / 52,428,800 ( < 1 % )                  ;
+; Total RAM Blocks                ; 0 / 2,560 ( 0 % )                               ;
+; Total DSP Blocks                ; 0 / 256 ( 0 % )                                 ;
+; Total HSSI STD RX PCSs          ; 0 / 48 ( 0 % )                                  ;
+; Total HSSI 10G RX PCSs          ; 0 / 48 ( 0 % )                                  ;
+; Total HSSI GEN3 RX PCSs         ; 0 / 48 ( 0 % )                                  ;
+; Total HSSI PMA RX Deserializers ; 0 / 48 ( 0 % )                                  ;
+; Total HSSI STD TX PCSs          ; 0 / 48 ( 0 % )                                  ;
+; Total HSSI 10G TX PCSs          ; 0 / 48 ( 0 % )                                  ;
+; Total HSSI GEN3 TX PCSs         ; 0 / 48 ( 0 % )                                  ;
+; Total HSSI PMA TX Serializers   ; 0 / 48 ( 0 % )                                  ;
+; Total HSSI PIPE GEN1_2s         ; 0 / 48 ( 0 % )                                  ;
+; Total HSSI GEN3s                ; 0 / 48 ( 0 % )                                  ;
+; Total PLLs                      ; 0 / 92 ( 0 % )                                  ;
+; Total DLLs                      ; 0 / 4 ( 0 % )                                   ;
++---------------------------------+-------------------------------------------------+
+
+
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Fitter Resource Utilization by Entity                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           ;
 +---------------------------------------------------------------------------------+----------------------+----------------------------------+---------------------------------------------------+----------------------------------+----------------------+---------------------+---------------------------+---------------+-------------------+------------+------+--------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------+--------------+
-; |cnn_process                                                                    ; 123559.7 (0.0)       ; 172620.9 (0.0)                   ; 49061.2 (0.0)                                     ; 0.0 (0.0)                        ; 0.0 (0.0)            ; 212905 (0)          ; 149103 (0)                ; 0 (0)         ; 168960            ; 0          ; 0    ; 0            ; |cnn_process|ConvLayer:conv1_2                                                                                                                                                                                                                              ; ConvLayer       ; work         ;
+; Compilation Hierarchy Node                                                      ; ALMs needed [=A-B+C] ; [A] ALMs used in final placement ; [B] Estimate of ALMs recoverable by dense packing ; [C] Estimate of ALMs unavailable ; ALMs used for memory ; Combinational ALUTs ; Dedicated Logic Registers ; I/O Registers ; Block Memory Bits ; DSP Blocks ; Pins ; Virtual Pins ; Full Hierarchy Name                                                                                                                                                                                                                                         ; Entity Name     ; Library Name ;
++---------------------------------------------------------------------------------+----------------------+----------------------------------+---------------------------------------------------+----------------------------------+----------------------+---------------------+---------------------------+---------------+-------------------+------------+------+--------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------+--------------+
+; |cnn_process                                                                    ; 346112.6 (0.3)       ; 482797.2 (0.5)                   ; 136684.5 (0.2)                                    ; 0.0 (0.0)                        ; 0.0 (0.0)            ; 540128 (1)          ; 475249 (0)                ; 0 (0)         ; 261360            ; 0          ; 51   ; 0            ; |cnn_process                                                                                                                                                                                                                                                ; cnn_process     ; work         ;
+;    |ConvLayer:conv1_2|                                                          ; 123559.7 (0.0)       ; 172620.9 (0.0)                   ; 49061.2 (0.0)                                     ; 0.0 (0.0)                        ; 0.0 (0.0)            ; 212905 (0)          ; 149103 (0)                ; 0 (0)         ; 168960            ; 0          ; 0    ; 0            ; |cnn_process|ConvLayer:conv1_2                                                                                                                                                                                                                              ; ConvLayer       ; work         ;
 ;       |DotProduct:\DotProduct_loop:0:DotProduct_i|                              ; 2227.1 (0.0)         ; 3126.8 (0.0)                     ; 899.7 (0.0)                                       ; 0.0 (0.0)                        ; 0.0 (0.0)            ; 4045 (0)            ; 2448 (0)                  ; 0 (0)         ; 0                 ; 0          ; 0    ; 0            ; |cnn_process|ConvLayer:conv1_2|DotProduct:\DotProduct_loop:0:DotProduct_i                                                                                                                                                                                   ; DotProduct      ; work         ;
 ;          |MCM:MCM_i|                                                            ; 941.1 (941.1)        ; 1282.1 (1282.1)                  ; 341.0 (341.0)                                     ; 0.0 (0.0)                        ; 0.0 (0.0)            ; 303 (303)           ; 2430 (2430)               ; 0 (0)         ; 0                 ; 0          ; 0    ; 0            ; |cnn_process|ConvLayer:conv1_2|DotProduct:\DotProduct_loop:0:DotProduct_i|MCM:MCM_i                                                                                                                                                                         ; MCM             ; work         ;
 ;          |MOA:MOA_i|                                                            ; 1286.0 (1286.0)      ; 1844.7 (1844.7)                  ; 558.7 (558.7)                                     ; 0.0 (0.0)                        ; 0.0 (0.0)            ; 3742 (3742)         ; 18 (18)                   ; 0 (0)         ; 0                 ; 0          ; 0    ; 0            ; |cnn_process|ConvLayer:conv1_2|DotProduct:\DotProduct_loop:0:DotProduct_i|MOA:MOA_i                                                                                                                                                                         ; MOA             ; work         ;

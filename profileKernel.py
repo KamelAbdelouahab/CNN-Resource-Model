@@ -12,8 +12,8 @@ os.environ['GLOG_minloglevel'] = '2'
 import caffe
 
 if __name__ == '__main__':
-    proto_file = "$HOME/Seafile/CNN-Models/alexnet.prototxt"
-    model_file = "$HOME/Seafile/CNN-Models/alexnet.caffemodel"
+    proto_file = "/home/kamel/Seafile/CNN-Models/squeezenet.prototxt"
+    model_file = "/home/kamel/Seafile/CNN-Models/squeezenet.caffemodel"
     layer_name = 'conv1'
     fit_rpt_filename = "Results/alexnet_conv1_6bits.txt"
     bitwidth = 6
@@ -26,5 +26,6 @@ if __name__ == '__main__':
     print("Bitwidth:" + str(bitwidth))
 
     #Models.resourceByEntity(fit_rpt_filename)
-    AnalyseWeights.histogram(conv, bitwidth)
-    Models.profileKernel(conv, fit_rpt_filename, bitwidth)
+    #AnalyseWeights.kernelStatsNetwork(net, bitwidth)
+    AnalyseWeights.kernelStatsTotal(conv, bitwidth)
+    #Models.profileKernel(conv, fit_rpt_filename, bitwidth)

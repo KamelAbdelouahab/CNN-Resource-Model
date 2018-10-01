@@ -9,18 +9,17 @@ import caffe
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 params = {
-   'axes.labelsize': 8,
-   'font.size': 8,
-   'legend.fontsize': 10,
-   'xtick.labelsize': 10,
-   'ytick.labelsize': 10,
-   'figure.figsize': [4.5, 4.5],
-   'axes.facecolor' : 'white'
-   }
+    'grid.color': 'k',
+    'grid.linestyle': 'dashdot',
+    'grid.linewidth': 0.6,
+    'font.family': 'Linux Biolinum O',
+    'font.size': 18,
+    'axes.facecolor': 'white'
+}
 rcParams.update(params)
 
 def importLayerParams(network_name, layer_name, bitwidth):
-    model_root = "C:/Users/Kamel/Seafile/CNN-Models/"
+    model_root = "/home/kamel/Seafile/CNN-Models/"
     proto_file = model_root + network_name + ".prototxt"
     model_file = model_root + network_name + ".caffemodel"
     dispMetaData(network_name, layer_name, bitwidth)
@@ -48,19 +47,18 @@ def correctEntityALM(conv, nb_alm, bitwidth):
     nb_alm = np.insert(nb_alm, 0, where_full_null)
     return nb_alm
 
-def plotLinearModel(x, y, coef,  label, r2, out_pdf):
+def plotLinearModel(x, y, coef,  label, r2, out_pdf, intercept=0):
     from matplotlib import rcParams
     params = {
-       'axes.labelsize': 10,
-       'font.size': 10,
-       'legend.fontsize': 10,
-       'xtick.labelsize': 10,
-       'ytick.labelsize': 10,
-       'figure.figsize': [4.5, 4.5],
-       'axes.facecolor' : 'white'
-       }
+        'grid.color': 'k',
+        'grid.linestyle': 'dashdot',
+        'grid.linewidth': 0.6,
+        'font.family': 'Linux Biolinum O',
+        'font.size': 18,
+        'axes.facecolor': 'white'
+    }
     rcParams.update(params)
-    lm_stats_str = ("s=%.2f, r$^2$=%.4f" %(coef[0],r2))
+    lm_stats_str = ("s=%.2f \nr$^2$=%.4f" %(coef,r2))
     plt.figure()
     plt.grid()
     plt.scatter(x, y,
@@ -68,14 +66,16 @@ def plotLinearModel(x, y, coef,  label, r2, out_pdf):
                 label=label)
     xlm = np.linspace(0, np.max(x), 100)
     plt.plot(xlm,
-            coef[0]*xlm,
+            coef*xlm + intercept,
             linewidth=2,
             color='#B22400',
             label= lm_stats_str)
-    legend = plt.legend(loc=2)
+    legend = plt.legend(loc=1)
+    plt.xlabel('$q_{zero}$')
+    plt.ylabel('ALMs')
     plt.axis([0, np.max(xlm), 0, np.max(y)])
-    #plt.savefig(out_pdf, bbox_inches ='tight')
-    plt.show()
+    plt.savefig(out_pdf, bbox_inches ='tight')
+    #plt.show()
 
 def dispMetaData(caffe_net, layer, bitwidth):
     print("=================================")
@@ -232,8 +232,8 @@ def profileKernel(conv_layer, fit_rpt_filename, bitwidth):
 
 def main():
     network_names = ['alexnet', 'squeezenet', 'alexnet_compressed', 'vgg16']
-    network_names = ['alexnet', 'squeezenet', 'alexnet_compressed', 'vgg16']
-    model_root = "C:/Users/Kamel/Seafile/CNN-Models/"
+    #network_names = ['alexnet']
+    model_root = "/home/kamel/Seafile/CNN-Models/"
     bitwidth = 6
     for network_name in network_names:
         if ('vgg' in network_name):

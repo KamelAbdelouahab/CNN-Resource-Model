@@ -15,7 +15,7 @@ use work.types.all;
 
 entity TensorExtractor is
   generic(
-    PIXEL_SIZE  : integer := PIXEL_CONST;
+    BITWIDTH  : integer := GENERAL_BITWIDTH;
     IMAGE_WIDTH : integer := 227;
     KERNEL_SIZE : integer := 3;
    NB_IN_FLOWS : integer := 19
@@ -37,7 +37,7 @@ architecture rtl of TensorExtractor is
   -- components
   component neighExtractor
     generic(
-      PIXEL_SIZE  : integer;
+      BITWIDTH  : integer;
       IMAGE_WIDTH : integer;
       KERNEL_SIZE : integer
       );
@@ -46,7 +46,7 @@ architecture rtl of TensorExtractor is
       clk      : in  std_logic;
       reset_n  : in  std_logic;
       enable   : in  std_logic;
-      in_data  : in  std_logic_vector(PIXEL_SIZE-1 downto 0);
+      in_data  : in  std_logic_vector(BITWIDTH-1 downto 0);
       in_dv    : in  std_logic;
       in_fv    : in  std_logic;
       out_data : out pixel_array (0 to KERNEL_SIZE * KERNEL_SIZE- 1);
@@ -62,7 +62,7 @@ begin
     SINGLE_CHANNEL : if c = 0 generate
       neighExtractor_0 : neighExtractor
         generic map (
-          PIXEL_SIZE  => PIXEL_SIZE,
+          BITWIDTH  => BITWIDTH,
           IMAGE_WIDTH => IMAGE_WIDTH,
           KERNEL_SIZE => KERNEL_SIZE
           )
@@ -82,7 +82,7 @@ begin
     MULTI_CHANNEL : if c > 0 generate
       neighExtractor_i : neighExtractor
         generic map (
-          PIXEL_SIZE  => PIXEL_SIZE,
+          BITWIDTH  => BITWIDTH,
           IMAGE_WIDTH => IMAGE_WIDTH,
           KERNEL_SIZE => KERNEL_SIZE
           )

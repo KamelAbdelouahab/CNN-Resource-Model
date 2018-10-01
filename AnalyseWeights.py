@@ -81,6 +81,35 @@ def nbNull(kernel):
                 nb_null += (kernel[c,j,k] == 0)
     return nb_null
 
+def kernelStatsNetwork(cnn,bitwidth):
+    nb_null, nb_ngtv, nb_pow2, nb_bit1 = 0,0,0,0
+    num_params_total = 0
+    params = cnn.params
+    blobs  = cnn.blobs
+    # Print CNN shape
+    for l in cnn._layer_names:
+        layerId = list(cnn._layer_names).index(l)
+        layerType =  cnn.layers[layerId].type
+        if (layerType == 'Convolution'):
+            conv_layer = params[l][0].data
+            conv_layer = quantizeWeight(conv_layer,bitwidth)
+            num_params_total +=  conv_layer.size
+            print("---------------")
+            for n in range(conv_layer.shape[0]):
+                nb_null += nbNull(conv_layer[n,:])
+                nb_pow2 += nbPow2(conv_layer[n,:])
+
+    nb_null = 100* nb_null / num_params_total
+    nb_pow2 = 100* nb_pow2 / num_params_total
+    print('Kernel Stats')
+    print( "%s\t%d "     % ("\tWeights", num_params_total))
+    print( "%s\t%.2f %%" % ("\tnb_null", nb_null))
+    print( "%s\t%.2f %%" % ("\tnb_pow2", nb_pow2))
+
+
+    return nb_null, nb_pow2
+
+
 def kernelStatsTotal(conv_layer,bitwidth):
     nb_null, nb_ngtv, nb_pow2, nb_bit1 = 0,0,0,0
     conv_layer = quantizeWeight(conv_layer,bitwidth)
@@ -90,15 +119,15 @@ def kernelStatsTotal(conv_layer,bitwidth):
         nb_pow2 += nbPow2(conv_layer[n,:])
         nb_bit1 += nbBit1(conv_layer[n,:], bitwidth)
     nb_null = 100* nb_null / conv_layer.size
-    nb_ngtv = 100* nb_ngtv / conv_layer.size
     nb_pow2 = 100* nb_pow2 / conv_layer.size
+    nb_ngtv = 100* nb_ngtv / conv_layer.size
     nb_bit1 = 100* nb_bit1 / (conv_layer.size*bitwidth)
     print('Kernel Stats')
     print( "%s\t%d "     % ("\tWeights", conv_layer.size))
     print( "%s\t%.2f %%" % ("\tnb_null", nb_null))
     print( "%s\t%.2f %%" % ("\tnb_pow2", nb_pow2))
-    print( "%s\t%.2f %%" % ("\tnb_ngtv", nb_ngtv))
-    print( "%s\t%.2f %%" % ("\tnb_bit1", nb_bit1))
+    #print( "%s\t%.2f %%" % ("\tnb_ngtv", nb_ngtv))
+    #print( "%s\t%.2f %%" % ("\tnb_bit1", nb_bit1))
     return nb_null, nb_ngtv, nb_pow2, nb_bit1
 
 def kernelStats(conv_layer,bitwidth):
