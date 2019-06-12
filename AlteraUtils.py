@@ -80,8 +80,8 @@ def dispSortedDict(dictionary):
         print("%s: %s" % (key, dictionary[key]))
 
 def listAsQuartus(length):
-    # This Quartus2 Cunt can't sorts the instance names correctly when using
-    # genrate. It doesnt sort them numerically, it doesnt sort them alphabetically
+    # Quartus2 sorts the instance names in a bizzare fashion:
+    # It doesnt sort them numerically, it doesnt sort them alphabetically
     # IT SORT THEM IN SOME WIERD LOGIC !!!!
     #    0 1 10 11 12 13 14 15 16 17 18 19 2 20 21 22 23 24 25 26 27 28 29
     # -> 0 10 11 12 13 14 15 16 17 18 19 1 2 20 21 22 23 24 25 26 27 28 29
